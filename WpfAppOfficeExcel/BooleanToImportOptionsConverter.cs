@@ -17,8 +17,7 @@ namespace WpfAppOfficeExcel.Converter
                 if ((enumImportOptions)value == enumImportOptions.None)
                 {
                     return false;
-                }
-                    
+                }                    
             }
             enumImportOptions imp;
             var t = Enum.TryParse(parameter.ToString(), true, out imp);
@@ -44,8 +43,8 @@ namespace WpfAppOfficeExcel.Converter
                 case enumImportOptions.RabattKunde:
                     if (targetType == typeof(bool?))
                     {
-                        var y = ((enumImportOptions)value & (enumImportOptions)parameter) == (enumImportOptions)parameter;
-                            return y;
+                        var addremove = ((enumImportOptions)value & (enumImportOptions)parameter) == (enumImportOptions)parameter;
+                            return addremove;
                     }
                     return true;
                 default:
@@ -60,9 +59,9 @@ namespace WpfAppOfficeExcel.Converter
                 if ((bool)value == true)
                 {
                     enumImportOptions imp;
-                    var t = Enum.TryParse(parameter.ToString(), true, out imp);
+                    var validParam = Enum.TryParse(parameter.ToString(), true, out imp);
 
-                    return t ? imp : enumImportOptions.None;
+                    return validParam ? imp : enumImportOptions.None;
                 }
                 else if((bool)value == false)
                 {

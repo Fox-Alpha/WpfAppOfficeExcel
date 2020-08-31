@@ -20,8 +20,6 @@ namespace WpfAppOfficeExcel.Importer
         }
     public class ImportOptions : INotifyPropertyChanged
     {
-
-
         private enumImportOptions activeImportOptions = enumImportOptions.None;
         public enumImportOptions ActiveImportOptions
         {
@@ -56,13 +54,10 @@ namespace WpfAppOfficeExcel.Importer
 
         public ImportOptions()
         {
-            //ActiveImportOptions = enumImportOptions.None;
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
 
-        //public void NotifyPropertyChanged(string propName)
-        
         public void OnPropertyRaised(string propName)
         {
             if (this.PropertyChanged != null)
