@@ -1,7 +1,11 @@
-﻿using Microsoft.Win32;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -37,6 +41,20 @@ namespace WpfAppOfficeExcel
             } 
         }
 
+        private CsvDataReader csvDataReader;
+        private CsvReader csvFileReader;
+
+
+        private string importFileName;
+        public string ImportFileName 
+        {
+            get { return importFileName; }
+            private set
+            {
+                importFileName = value;
+            } 
+        }
+
         public void OnPropertyRaised(string propName)
         {
             if (this.PropertyChanged != null)
@@ -52,7 +70,7 @@ namespace WpfAppOfficeExcel
             InitializeComponent();
 
             Import = new ImportOptions();
-
+            
             this.DataContext = this;
         }
 
@@ -72,12 +90,24 @@ namespace WpfAppOfficeExcel
                 //gbSelectOptionForImport.IsEnabled = true;
                 BEnableImportOptions = true;
                 tbFilePathInfo.Text = openFileDialog.FileName;
+                ImportFileName = openFileDialog.FileName;
             }
         }
 
         private void ButtStartImport_Click(object sender, RoutedEventArgs e)
         {
+            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default };
 
+            //using (csvDataReader = new CsvDataReader(new CsvReader(new StreamReader(ImportFileName), csvConfig)))
+            //{
+            //    csvDataReader.FieldCount;
+            //    csvDataReader.get
+            //}
+
+            using (csvFileReader = new CsvReader(new StreamReader(ImportFileName), csvConfig))
+            {
+                //https://github.com/JoshClose/CsvHelper/issues/948
+            }
         }
     }
 }
