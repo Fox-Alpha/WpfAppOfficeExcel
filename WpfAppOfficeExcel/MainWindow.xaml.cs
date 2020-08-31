@@ -74,5 +74,10 @@ namespace WpfAppOfficeExcel
                 tbFilePathInfo.Text = openFileDialog.FileName;
             }
         }
+
+        private void ButtStartImport_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
