@@ -13,15 +13,39 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using WpfAppOfficeExcel.Importer;
 
 namespace WpfAppOfficeExcel
 {
     /// <summary>
     /// Interaktionslogik für MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ImportOptions Import;
+        private ImportOptions import;
+        public ImportOptions Import 
+        { 
+            get => import; 
+            set => import = value; 
+        }
+        public bool BEnableImportOptions 
+        { 
+            get => bEnableImportOptions; set 
+            { 
+                bEnableImportOptions = value;
+                OnPropertyRaised("BEnableImportOptions");
+            } 
+        }
+
+        public void OnPropertyRaised(string propName)
+        {
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
+        }
+
+        private bool bEnableImportOptions = false;
+
+        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainWindow()
         {
@@ -45,59 +69,10 @@ namespace WpfAppOfficeExcel
 
             if (openFileDialog.ShowDialog() == true)
             {
-                gbSelectOptionForImport.IsEnabled = true;
+                //gbSelectOptionForImport.IsEnabled = true;
+                BEnableImportOptions = true;
                 tbFilePathInfo.Text = openFileDialog.FileName;
             }
-        }
-    }
-
-    public class ImportOptions : INotifyPropertyChanged
-    {
-        [Flags]
-        public enum enumImportOptions
-        {
-            None,
-            WarenEingang,
-            WarenAusgang,
-            ProduktVerlauf,
-            ProduktRetoure,
-            WarenbewegungPositiv,
-            WarenbewegungNegativ,
-            UmlagerungEingang,
-            UmlagerungAusgang,
-            Inventur
-        }
-
-        private enumImportOptions activeImportOptions;
-
-        public enumImportOptions ActiveImportOptions
-        {
-            get { return activeImportOptions; }
-            set 
-            {
-                if (activeImportOptions != enumImportOptions.None)
-                {
-                    return;
-                    //activeImportOptions = value;
-                }
-                else
-                {
-                    activeImportOptions |= value;
-                }                
-            }
-        }
-
-        public ImportOptions()
-        {
-            ActiveImportOptions = enumImportOptions.None;
-        }
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void NotifyPropertyChanged(string propName)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
     }
 }
