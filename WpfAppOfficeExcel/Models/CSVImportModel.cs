@@ -9,12 +9,12 @@ namespace WpfAppOfficeExcel.Models
     public class CSVImportModel
     {
         public string Typ { get; set; }
-        public int Mandant { get; set; }
+        public uint Mandant { get; set; }
         public string FormArt { get; set; }
         public int FormIntern { get; set; }
         public string AufNr { get; set; }
-        public string IntPos { get; set; }
-        public string UntPos { get; set; }
+        public int IntPos { get; set; }
+        public int UntPos { get; set; }
         public string LagerKey { get; set; }
         public string AnLager { get; set; }
         public string ArtikelNr { get; set; }
@@ -31,16 +31,16 @@ namespace WpfAppOfficeExcel.Models
         public string Menge { get; set; }
         public string Kontonummer { get; set; }
         public string Kasse { get; set; }
-        public string Bon { get; set; }
-        public string BonPosition { get; set; }
+        public uint Bon { get; set; }
+        public UInt32 BonPosition { get; set; }
         public string EingabeArtikelNr { get; set; }
-        public string EingabeMenge { get; set; }
-        public string Einheitspreis { get; set; }
+        public uint EingabeMenge { get; set; }
+        public float Einheitspreis { get; set; }
         public string RSGrund { get; set; } //RS-Grund
         public string Lieferant { get; set; }
         public string LieferDatum { get; set; }
         public string LieferReferenz { get; set; }
-        public string Buchung { get; set; }
+        public DateTime Buchung { get; set; }
         public string KontrolliertAm { get; set; }
         public string KontrolliertDurch { get; set; }
 
