@@ -18,6 +18,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using WpfAppOfficeExcel.Importer;
+using WpfAppOfficeExcel.Models;
 
 namespace WpfAppOfficeExcel
 {
@@ -94,7 +95,7 @@ namespace WpfAppOfficeExcel
             }
         }
 
-        private async void ButtStartImport_Click(object sender, RoutedEventArgs e)
+        private void ButtStartImport_Click(object sender, RoutedEventArgs e)
         {
             CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default };
 
@@ -107,6 +108,7 @@ namespace WpfAppOfficeExcel
             using (csvFileReader = new CsvReader(new StreamReader(ImportFileName), csvConfig))
             {
                 int i = 0;
+                csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
 
                 //if (csvFileReader.ReadHeader())
                 //{
@@ -115,13 +117,44 @@ namespace WpfAppOfficeExcel
 
                 csvFileReader.Read();
                 csvFileReader.ReadHeader();
-                var nameIndex = csvFileReader.Context.NamedIndexes;
-                var headers = csvFileReader.Context.HeaderRecord;
-                var recList = csvFileReader.GetRecords<dynamic>().ToList();
+                //var nameIndex = csvFileReader.Context.NamedIndexes;
+                //var headers = csvFileReader.Context.HeaderRecord;
+                var recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
+
+                var Filialen = recList.Select(l => l.LagerKey).GroupBy(x => x)
+                             .Where(g => g.Count() > 1)
+                             .Select(g => g.Key)
+                             .ToList();
+                Filialen.Sort();
+
+                List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
+
+                foreach (var filiale in Filialen)
+                {
+                    var FilOut1 = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == "WA").ToList();
+
+                    if (FilOut1.Count > 0)
+                    {
+                        FilialenExport.Add(FilOut1);
+                    }
+                }
+
+                
+
+                //var distinctList = Filialen.Select(f => f).GroupBy(f => f.MyEqualityProperty).Select(grp => grp.First());
+
+                //List<String> duplicates = Filialen.GroupBy(x => x)
+                //             .Where(g => g.Count() > 1)
+                //             .Select(g => g.Key)
+                //             .ToList();
+
+
+
                 //https://github.com/JoshClose/CsvHelper/issues/948
                 //while (await csvFileReader.ReadAsync())
                 //{
                 //    i++;
+
                 //}
                 //var columns = csvFileReader.Context.ColumnCount;
             }
