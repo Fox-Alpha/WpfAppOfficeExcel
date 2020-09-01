@@ -34,7 +34,7 @@ namespace WpfAppOfficeExcel.Models
         public uint Bon { get; set; }
         public UInt32 BonPosition { get; set; }
         public string EingabeArtikelNr { get; set; }
-        public uint EingabeMenge { get; set; }
+        public int EingabeMenge { get; set; }
         public float Einheitspreis { get; set; }
         public string RSGrund { get; set; } //RS-Grund
         public string Lieferant { get; set; }
