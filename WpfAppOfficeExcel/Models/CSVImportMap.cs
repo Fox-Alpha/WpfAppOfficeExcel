@@ -41,7 +41,7 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.EingabeArtikelNr);
             Map(m => m.EingabeMenge);
             Map(m => m.Einheitspreis);
-            Map(m => m.RS-Grund);
+            Map(m => m.RSGrund).Name("RS-Grund", "RSGrund");
             Map(m => m.Lieferant);
 
             Map(m => m.LieferDatum);
