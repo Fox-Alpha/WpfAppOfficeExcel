@@ -94,7 +94,7 @@ namespace WpfAppOfficeExcel
             }
         }
 
-        private void ButtStartImport_Click(object sender, RoutedEventArgs e)
+        private async void ButtStartImport_Click(object sender, RoutedEventArgs e)
         {
             CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default };
 
@@ -106,7 +106,24 @@ namespace WpfAppOfficeExcel
 
             using (csvFileReader = new CsvReader(new StreamReader(ImportFileName), csvConfig))
             {
+                int i = 0;
+
+                //if (csvFileReader.ReadHeader())
+                //{
+                //    ;
+                //}
+
+                csvFileReader.Read();
+                csvFileReader.ReadHeader();
+                var nameIndex = csvFileReader.Context.NamedIndexes;
+                var headers = csvFileReader.Context.HeaderRecord;
+                var recList = csvFileReader.GetRecords<dynamic>().ToList();
                 //https://github.com/JoshClose/CsvHelper/issues/948
+                //while (await csvFileReader.ReadAsync())
+                //{
+                //    i++;
+                //}
+                //var columns = csvFileReader.Context.ColumnCount;
             }
         }
     }
