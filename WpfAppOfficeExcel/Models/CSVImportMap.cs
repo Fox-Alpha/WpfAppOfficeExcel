@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace WpfAppOfficeExcel.Models
 {
-    class CSVImportMap : ClassMap<CSVImportModel>
+    public class CSVImportMap : ClassMap<CSVImportModel>
     {
         public CSVImportMap()
         {
