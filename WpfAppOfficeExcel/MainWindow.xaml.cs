@@ -1,5 +1,7 @@
-﻿using CsvHelper;
+﻿using ClosedXML.Excel;
+using CsvHelper;
 using CsvHelper.Configuration;
+using CsvHelper.Excel;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -7,6 +9,7 @@ using System.ComponentModel;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -55,6 +58,8 @@ namespace WpfAppOfficeExcel
                 importFileName = value;
             } 
         }
+
+        string ExportToXLSFile = "Export.xlsx";
 
         public void OnPropertyRaised(string propName)
         {
@@ -110,15 +115,9 @@ namespace WpfAppOfficeExcel
                 int i = 0;
                 csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
 
-                //if (csvFileReader.ReadHeader())
-                //{
-                //    ;
-                //}
-
                 csvFileReader.Read();
                 csvFileReader.ReadHeader();
-                //var nameIndex = csvFileReader.Context.NamedIndexes;
-                //var headers = csvFileReader.Context.HeaderRecord;
+
                 var recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
 
                 var Filialen = recList.Select(l => l.LagerKey).GroupBy(x => x)
@@ -139,24 +138,45 @@ namespace WpfAppOfficeExcel
                     }
                 }
 
-                
+                /*
+                 * Excel Export mit ClosedXML
+                 * Datei muss existieren
+                 */
 
-                //var distinctList = Filialen.Select(f => f).GroupBy(f => f.MyEqualityProperty).Select(grp => grp.First());
+                using (var workbook = new XLWorkbook(ExportToXLSFile, ))
+                {
+                    foreach (var item in Filialen)
+                    {
+                        var worksheet = workbook.Worksheets.Add(item);
+                        int index = Filialen.IndexOf(item);
 
-                //List<String> duplicates = Filialen.GroupBy(x => x)
-                //             .Where(g => g.Count() > 1)
-                //             .Select(g => g.Key)
-                //             .ToList();
+                        worksheet.Cell(1, 1).InsertData(FilialenExport[index]);
+                            //.Cell("A1").Value = "Hello World!";
+                        
+                    }
+                    workbook.Save();
+                }
 
 
-
-                //https://github.com/JoshClose/CsvHelper/issues/948
-                //while (await csvFileReader.ReadAsync())
+                /*
+                 * Excel Export mit CSVHelper Erweiterung
+                 * Kann nicht in verschiedenen Sheets der gleichen Datei schreiben
+                 */
+                //using (var xlsSerializer = new ExcelSerializer(ExportToXLSFile, csvConfig))
                 //{
-                //    i++;
+                //    var writer = new CsvWriter(xlsSerializer);
+                //    foreach (var item in Filialen)
+                //    {
+                //        xlsSerializer.Workbook.AddWorksheet(item);
+                //        xlsSerializer.Workbook.Worksheets.Worksheet(item);
 
+                //        //{
+                //            writer.Configuration.AutoMap<CSVImportModel>();
+                //            int index = Filialen.IndexOf(item);
+                //            writer.WriteRecords(FilialenExport[index]);
+                //        //}
+                //    }
                 //}
-                //var columns = csvFileReader.Context.ColumnCount;
             }
         }
     }
