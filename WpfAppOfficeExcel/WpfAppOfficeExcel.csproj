@@ -103,6 +103,7 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Models\CSVImportInfoModel.cs" />
     <Compile Include="Models\CSVImportMap.cs" />
     <Compile Include="Models\CSVImportModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs">
