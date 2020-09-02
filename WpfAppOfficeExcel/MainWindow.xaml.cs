@@ -40,37 +40,28 @@ namespace WpfAppOfficeExcel
         }
         public bool BEnableImportOptions 
         { 
-            get => bEnableImportOptions; set 
+            get => bEnableImportOptions; 
+            set 
             { 
                 bEnableImportOptions = value;
                 OnPropertyRaised("BEnableImportOptions");
             } 
         }
 
-        private CsvDataReader csvDataReader;
+        //private CsvDataReader csvDataReader;
         private CsvReader csvFileReader;
 
+        private CSVImportInfoModel _importInfo;
 
-        private string importFileName;
-        public string ImportFileName 
+        public CSVImportInfoModel ImportInfo
         {
-            get { return importFileName; }
-            private set
-            {
-                importFileName = value;
-                OnPropertyRaised("ImportFileName");
-            } 
-        }
-
-        string ExportToXLSFile = "Export.xlsx";
-
-        public void OnPropertyRaised(string propName)
-        {
-            if (this.PropertyChanged != null)
-                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
+            get { return _importInfo; }
+            set { _importInfo = value; }
         }
 
         private bool bEnableImportOptions = false;
+
+        private BackgroundWorker worker = new BackgroundWorker();
 
         public event PropertyChangedEventHandler PropertyChanged;
 
@@ -78,25 +69,26 @@ namespace WpfAppOfficeExcel
         {
             InitializeComponent();
 
-            Import = new ImportOptions();
-            
-            this.DataContext = this;
-
+            //BackgroundWorker Task
             worker.WorkerReportsProgress = true;
             worker.DoWork += worker_DoWork;
             worker.ProgressChanged += worker_ProgressChanged;
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+
+            Import = new ImportOptions();
+
+            this.DataContext = this;
+
+            ImportInfo = new CSVImportInfoModel("", "Export.xlsx");
         }
 
-        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        public void OnPropertyRaised(string propName)
         {
-            //pbStatus.IsIndeterminate = false;
-            pbStatus.Value = 100;
-            ButtonOpenExcelExport.IsEnabled = true;
-            BEnableImportOptions = true;
+            if (this.PropertyChanged != null)
+                this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
         }
 
-        BackgroundWorker worker = new BackgroundWorker();
+        
 
         private void ButtonFileOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -113,60 +105,26 @@ namespace WpfAppOfficeExcel
             {
                 //gbSelectOptionForImport.IsEnabled = true;
                 BEnableImportOptions = true;
-                tbFilePathInfo.Text = openFileDialog.FileName;
-                ImportFileName = openFileDialog.FileName;
+                //tbFilePathInfo.Text = openFileDialog.FileName;
+                ImportInfo.ImportFileName = openFileDialog.FileName;
             }
         }
 
         private void ButtStartImport_Click(object sender, RoutedEventArgs e)
         {
-            
-            prgBar.IsIndeterminate = true;
             pbStatus.Value = 0;
-            //pbStatus.IsIndeterminate = true;
-            if (!worker.IsBusy)
+            
+            if (worker != null && !worker.IsBusy)
             {
                 worker.RunWorkerAsync();
             }
             else
                 BEnableImportOptions = false;
-
-
-
-
-
-            /*
-             * Excel Export mit CSVHelper Erweiterung
-             * Kann nicht in verschiedenen Sheets der gleichen Datei schreiben
-             */
-            //using (var xlsSerializer = new ExcelSerializer(ExportToXLSFile, csvConfig))
-            //{
-            //    var writer = new CsvWriter(xlsSerializer);
-            //    foreach (var item in Filialen)
-            //    {
-            //        xlsSerializer.Workbook.AddWorksheet(item);
-            //        xlsSerializer.Workbook.Worksheets.Worksheet(item);
-
-            //        //{
-            //            writer.Configuration.AutoMap<CSVImportModel>();
-            //            int index = Filialen.IndexOf(item);
-            //            writer.WriteRecords(FilialenExport[index]);
-            //        //}
-            //    }
-            //}
-
-        }
-
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            
         }
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default };
-
-            
 
             //using (csvDataReader = new CsvDataReader(new CsvReader(new StreamReader(ImportFileName), csvConfig)))
             //{
@@ -174,9 +132,8 @@ namespace WpfAppOfficeExcel
             //    csvDataReader.get
             //}
 
-            using (csvFileReader = new CsvReader(new StreamReader(ImportFileName), csvConfig))
+            using (csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
             {
-                //int i = 0;
                 (sender as BackgroundWorker).ReportProgress(0, "Daten Import");
                 csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
 
@@ -186,6 +143,9 @@ namespace WpfAppOfficeExcel
                 var recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
 
                 (sender as BackgroundWorker).ReportProgress(15, "Daten Extrahieren");
+
+                //Extrahieren der Filialen
+                (sender as BackgroundWorker).ReportProgress(20, "Filialen Extrahieren");
                 var Filialen = recList.Select(l => l.LagerKey).GroupBy(x => x)
                              .Where(g => g.Count() > 1)
                              .Select(g => g.Key)
@@ -194,9 +154,10 @@ namespace WpfAppOfficeExcel
 
                 List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
 
-                (sender as BackgroundWorker).ReportProgress(35, "Filialen Extrahieren");
+                
                 foreach (var filiale in Filialen)
                 {
+                    //ToDo: Filter auf Formular Auswahl setzen
                     var FilOut1 = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == "WA").ToList();
 
                     if (FilOut1.Count > 0)
@@ -218,23 +179,18 @@ namespace WpfAppOfficeExcel
                         var worksheet = workbook.Worksheets.Add(item);
                         int index = Filialen.IndexOf(item);
 
+                        worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord);
                         worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
-                        //.Cell("A1").Value = "Hello World!";
-
                     }
-                    (sender as BackgroundWorker).ReportProgress(80, "Export Datei erstellen");
-                    workbook.SaveAs(ExportToXLSFile);
+
+                    (sender as BackgroundWorker).ReportProgress(90, "Speichern der Exportdatei");
+                    workbook.SaveAs(ImportInfo.ExportFileName);
                 }
+                /*
+                 * *****************************************************************
+                 */
 
-                
-                
                 (sender as BackgroundWorker).ReportProgress(95, "Export abgeschlossen");
-
-                //for (int i = 0; i < 100; i++)
-                //{
-                //    (sender as BackgroundWorker).ReportProgress(i);
-                //    Thread.Sleep(100);
-                //}
             }
         }
 
@@ -248,17 +204,31 @@ namespace WpfAppOfficeExcel
         {
             BEnableImportOptions = true;
             
-            ImportFileName = @"C:\Temp\Wolsdorff\Excel_Export_Macro\Tagesbericht-WT5_1010-1015_20200801-20200810.csv";
-            //tbFilePathInfo.Text = ImportFileName;
+            ImportInfo.ImportFileName = @"C:\Temp\Wolsdorff\Excel_Export_Macro\Tagesbericht-WT5_1010-1015_20200801-20200810.csv";
+        }
+
+        private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            pbStatus.Value = 100;
+            ButtonOpenExcelExport.IsEnabled = true;
+            BEnableImportOptions = true;
         }
 
         private void ButtonOpenExcelExport_Click(object sender, RoutedEventArgs e)
         {
-            if (File.Exists(ExportToXLSFile))
+            if (File.Exists(ImportInfo.ExportFileName))
             {
-                Process p = new Process() { StartInfo = new ProcessStartInfo() { FileName = ExportToXLSFile, UseShellExecute = true, Verb = "Open", } };
+                Process pExcelExport = new Process() 
+                { 
+                    StartInfo = new ProcessStartInfo() 
+                    { 
+                        FileName = ImportInfo.ExportFileName, 
+                        UseShellExecute = true, 
+                        Verb = "Open"
+                    } 
+                };
 
-                p.Start();
+                pExcelExport.Start();
             }
         }
     }
