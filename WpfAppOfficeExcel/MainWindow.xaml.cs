@@ -122,9 +122,44 @@ namespace WpfAppOfficeExcel
                 BEnableImportOptions = false;
         }
 
+        private bool ReadExceptionResponse(CsvHelperException re)
+        {
+            //var t = re.InnerException.Data["CsvHelper"].ToString();
+            var dat = re.Data;
+            var msg = re.Message;
+            //var idx = re.ReadingContext.ReusableMemberMapData.Index;
+            //var map = re.ReadingContext.ReusableMemberMapData.Names[0];
+            var row = re.ReadingContext.Row;
+            var rec = re.ReadingContext.Record;
+
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Beim Lesen der Daten aus der Import Datei ist ein Fehler aufgetreten");
+            sb.AppendLine($"Original Fehler: {msg}");
+            sb.AppendLine("");
+            sb.AppendLine($"Der Fehler trat in der Zeile {row} auf");
+            //sb.AppendLine($"Der Wert: {txt} konnte nicht in das erwartete Format umgewandelt werden");
+            //sb.AppendLine($"Der Wert trat in der Spalte {idx + 1} auf");
+            //sb.AppendLine($"Der Name der Spalte lautet {map}");
+            sb.AppendLine($"");
+            sb.AppendLine($"Die Zeile besteht aus folgenden Daten:");
+            if (rec.Length > 0)
+            {
+                sb.AppendLine($"\t{string.Join(", ", rec)}");
+            }
+            sb.AppendLine($"");
+            sb.AppendLine($"");
+            sb.AppendLine($"");
+            sb.AppendLine($"");
+            sb.AppendLine($"");
+
+            var err = sb.ToString();
+
+            return false;
+        }
+
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default, BadDataFound=BadDataResponse };
+            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default, BadDataFound=BadDataResponse, ReadingExceptionOccurred=ReadExceptionResponse };
 
             //using (csvDataReader = new CsvDataReader(new CsvReader(new StreamReader(ImportFileName), csvConfig)))
             //{
@@ -146,12 +181,6 @@ namespace WpfAppOfficeExcel
                 }
                 catch (CsvHelper.TypeConversion.TypeConverterException re)
                 {
-                    var a = re.Text;
-                    var b = re.Value;
-                    var c = re.Data;
-                    var msg = re.Message;
-                    var idx = re.MemberMapData.Index;
-                    var map = re.MemberMapData.Names[0];
                 }
                 
 
