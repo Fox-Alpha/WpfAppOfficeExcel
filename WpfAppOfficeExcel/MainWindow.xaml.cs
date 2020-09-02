@@ -151,7 +151,7 @@ namespace WpfAppOfficeExcel
                     var c = re.Data;
                     var msg = re.Message;
                     var idx = re.MemberMapData.Index;
-                    var map = re.MemberMapData.Names[idx];
+                    var map = re.MemberMapData.Names[0];
                 }
                 
 
