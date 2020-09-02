@@ -124,7 +124,7 @@ namespace WpfAppOfficeExcel
 
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default };
+            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) { AllowComments = true, Delimiter = ";", HasHeaderRecord = true, TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, Encoding = Encoding.Default, BadDataFound=BadDataResponse };
 
             //using (csvDataReader = new CsvDataReader(new CsvReader(new StreamReader(ImportFileName), csvConfig)))
             //{
@@ -136,13 +136,32 @@ namespace WpfAppOfficeExcel
             {
                 (sender as BackgroundWorker).ReportProgress(0, "Daten Import");
                 csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
+                List<CSVImportModel> recList = null;
+                try
+                {
+                    csvFileReader.Read();
+                    csvFileReader.ReadHeader();
 
-                csvFileReader.Read();
-                csvFileReader.ReadHeader();
-
-                var recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
+                    recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
+                }
+                catch (CsvHelper.TypeConversion.TypeConverterException re)
+                {
+                    var a = re.Text;
+                    var b = re.Value;
+                    var c = re.Data;
+                    var msg = re.Message;
+                    var idx = re.MemberMapData.Index;
+                    var map = re.MemberMapData.Names[idx];
+                }
+                
 
                 (sender as BackgroundWorker).ReportProgress(15, "Daten Extrahieren");
+
+                if (recList == null)
+                {
+                    (sender as BackgroundWorker).ReportProgress(100, "Fehler beim Daten Extrahieren");
+                    return;
+                }
 
                 //Extrahieren der Filialen
                 (sender as BackgroundWorker).ReportProgress(20, "Filialen Extrahieren");
@@ -150,6 +169,7 @@ namespace WpfAppOfficeExcel
                              .Where(g => g.Count() > 1)
                              .Select(g => g.Key)
                              .ToList();
+
                 Filialen.Sort();
 
                 List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
@@ -179,7 +199,10 @@ namespace WpfAppOfficeExcel
                         var worksheet = workbook.Worksheets.Add(item);
                         int index = Filialen.IndexOf(item);
 
-                        worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord);
+                        var rowHeader = worksheet.FirstRow();
+                        //rowHeader.Cell(1).InsertData(csvFileReader.Context.HeaderRecord);
+                        worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord.ToList(), true);
+                        //worksheet.Cell(1, 1).AsRange();
                         worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
                     }
 
@@ -192,6 +215,12 @@ namespace WpfAppOfficeExcel
 
                 (sender as BackgroundWorker).ReportProgress(95, "Export abgeschlossen");
             }
+        }
+
+        private void BadDataResponse(ReadingContext obj)
+        {
+            int row = obj.Row;
+            string col = obj.Field;
         }
 
         void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
