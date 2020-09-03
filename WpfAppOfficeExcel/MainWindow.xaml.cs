@@ -49,7 +49,7 @@ namespace WpfAppOfficeExcel
         }
 
         //private CsvDataReader csvDataReader;
-        private CsvReader csvFileReader;
+        //private CsvReader csvFileReader;
 
         private CSVImportInfoModel _importInfo;
 
@@ -156,6 +156,8 @@ namespace WpfAppOfficeExcel
             sb.AppendLine($"");
 
             var err = sb.ToString();
+            sb.Clear();
+            sb = null;
 
             return false;
         }
