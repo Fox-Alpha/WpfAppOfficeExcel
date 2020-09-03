@@ -4,6 +4,7 @@ using CsvHelper.Configuration;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -26,7 +27,12 @@ namespace WpfAppOfficeExcel
             //    csvDataReader.get
             //}
 
-            using (csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
+            if (ErrStrLst == null)
+            {
+                ErrStrLst = new List<string[]>();
+            }
+
+            using (CsvReader csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
             {
                 (sender as BackgroundWorker).ReportProgress(0, "Start Daten Import");
 
@@ -74,6 +80,8 @@ namespace WpfAppOfficeExcel
                     {
                         FilialenExport.Add(FilOut1);
                     }
+                    else
+                        FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } }) ;
                 }
 
                 /*
@@ -85,6 +93,7 @@ namespace WpfAppOfficeExcel
 
                 using (var workbook = new XLWorkbook())
                 {
+                    Debug.WriteLine($"Filialen: {Filialen.Count} == Exports: {FilialenExport.Count}");
                     foreach (var item in Filialen)
                     {
                         var worksheet = workbook.Worksheets.Add(item);
@@ -94,6 +103,7 @@ namespace WpfAppOfficeExcel
                         //rowHeader.Cell(1).InsertData(csvFileReader.Context.HeaderRecord);
                         worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord.ToList(), true);
                         //worksheet.Cell(1, 1).AsRange();
+                        ///ToDo: Fehler wenn im Eintrag keine Daten gefüllt sind
                         worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
                     }
 
@@ -114,6 +124,18 @@ namespace WpfAppOfficeExcel
 
                     (sender as BackgroundWorker).ReportProgress(90, "Speichern der Exportdatei");
                     workbook.SaveAs(ImportInfo.ExportFileName);
+                    //workbook.Dispose();
+                    ErrStrLst.Clear();
+                    recList.Clear();
+                    Filialen.Clear();
+                    FilialenExport.Clear();
+                    
+                    //workbook.Dispose();
+                    //workbook = null;
+                    ErrStrLst = null;
+                    recList = null;
+                    Filialen = null;
+                    FilialenExport = null;
                 }
                 /*
                  * *****************************************************************
@@ -121,6 +143,13 @@ namespace WpfAppOfficeExcel
 
                 (sender as BackgroundWorker).ReportProgress(95, "Export abgeschlossen");
             }
+            Debug.WriteLine("The highest generation is {0}", GC.MaxGeneration);
+            Debug.WriteLine("Total Memory: {0}", GC.GetTotalMemory(false));
+            GC.Collect(0);
+            Debug.WriteLine("Total Memory: {0}", GC.GetTotalMemory(false));
+            GC.Collect(2);
+            Debug.WriteLine("Total Memory: {0}", GC.GetTotalMemory(false));
+
         }
 
         private void BadDataResponse(ReadingContext obj)
