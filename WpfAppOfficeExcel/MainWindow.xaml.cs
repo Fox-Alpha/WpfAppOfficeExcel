@@ -112,6 +112,7 @@ namespace WpfAppOfficeExcel
         private void ButtStartImport_Click(object sender, RoutedEventArgs e)
         {
             pbStatus.Value = 0;
+            ButtonOpenExcelExport.IsEnabled = false;
             
             if (worker != null && !worker.IsBusy)
             {
