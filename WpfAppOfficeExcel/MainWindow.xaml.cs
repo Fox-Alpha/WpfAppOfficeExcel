@@ -22,6 +22,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 using WpfAppOfficeExcel.Importer;
 using WpfAppOfficeExcel.Models;
 
@@ -33,6 +34,7 @@ namespace WpfAppOfficeExcel
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         private ImportOptions import;
+        public DateTime dtTimer { get; set; }
         public ImportOptions Import 
         { 
             get => import; 
@@ -66,9 +68,14 @@ namespace WpfAppOfficeExcel
 
         public event PropertyChangedEventHandler PropertyChanged;
 
+        public DispatcherTimer dt;
+
         public MainWindow()
         {
             InitializeComponent();
+            dt = new DispatcherTimer();
+            dt.Interval = new TimeSpan(0,0,1);
+            dt.Tick += TimerTick;
 
             //BackgroundWorker Task
             worker.WorkerReportsProgress = true;
@@ -79,8 +86,15 @@ namespace WpfAppOfficeExcel
             Import = new ImportOptions();
 
             this.DataContext = this;
+            dtTimer = new DateTime(1977, 12, 2, 0, 0, 0);
 
             ImportInfo = new CSVImportInfoModel("", "Export.xlsx");
+        }
+
+        private void TimerTick(object sender, EventArgs e)
+        {
+            dtTimer = dtTimer.AddSeconds(1);
+            pbStatusTextTime.Text = dtTimer.ToString("hh:mm:ss");
         }
 
         public void OnPropertyRaised(string propName)
@@ -113,9 +127,13 @@ namespace WpfAppOfficeExcel
         {
             pbStatus.Value = 0;
             ButtonOpenExcelExport.IsEnabled = false;
+            dtTimer = new DateTime(1977,12,2,0,0,0,DateTimeKind.Local);
             
             if (worker != null && !worker.IsBusy)
             {
+                if (!dt.IsEnabled)
+                    dt.Start();
+                pbStatusRun.IsIndeterminate = true;
                 worker.RunWorkerAsync();
             }
             else
