@@ -104,6 +104,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Models\CSVImportBackgroundWorker.cs" />
+    <Compile Include="Models\CSVImportConverter.cs" />
     <Compile Include="Models\CSVImportInfoModel.cs" />
     <Compile Include="Models\CSVImportMap.cs" />
     <Compile Include="Models\CSVImportModel.cs" />
