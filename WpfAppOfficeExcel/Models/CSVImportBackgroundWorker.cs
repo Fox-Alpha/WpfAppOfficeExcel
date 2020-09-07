@@ -165,10 +165,15 @@ namespace WpfAppOfficeExcel
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+
         {
             pbStatus.Value = 100;
+            pbStatusRun.IsIndeterminate = false;
             ButtonOpenExcelExport.IsEnabled = true;
             BEnableImportOptions = true;
+
+            if (dt.IsEnabled)
+                dt.Stop();
         }
     }
 }
