@@ -21,8 +21,24 @@ namespace WpfAppOfficeExcel.Importer
             UmlagerungAusgang = 256,
             Inventur = 512
         }
+    
     public class ImportOptions : INotifyPropertyChanged
     {
+        public readonly Dictionary<string, string> dictImportOptions = new Dictionary<string, string>()
+        {
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.None), ""},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.WarenEingang), "WE"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.WarenAusgang), "WA"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.ProduktVerlauf), "PV"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.ProduktRetoure), "PR"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.RabattKunde), "RN"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.WarenbewegungPositiv), "WP"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.WarenbewegungNegativ), "WN"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.UmlagerungEingang), "UE"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.UmlagerungAusgang), "UA"},
+            {Enum.GetName(typeof(enumImportOptions), enumImportOptions.Inventur), "MI"},     // ???
+        };
+
         private enumImportOptions activeImportOptions = enumImportOptions.None;
         public enumImportOptions ActiveImportOptions
         {
@@ -59,7 +75,18 @@ namespace WpfAppOfficeExcel.Importer
         {
             List<string> listImpOpt = new List<string>();
 
-           activeImportOptions.
+            var vals = Enum.GetValues(typeof(enumImportOptions));
+
+            foreach (enumImportOptions val in vals)
+            {
+                if ((activeImportOptions & val) == val)
+                {
+                    if(dictImportOptions.TryGetValue(Enum.GetName(typeof(enumImportOptions), val), out string shortVal))
+                    {
+                        listImpOpt.Add(shortVal);
+                    }                    
+                }
+            }           
 
             return listImpOpt;
         }
