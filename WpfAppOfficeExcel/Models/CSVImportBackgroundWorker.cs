@@ -71,8 +71,11 @@ namespace WpfAppOfficeExcel
                 (sender as BackgroundWorker).ReportProgress(30, "Filtern der Daten nach Auswahl");
                 List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
 
+                List<string> vs = Import.GetImportOptionsAsList();
+
                 foreach (var filiale in Filialen)
                 {
+                    //ToDo: Schleife durch ausgewähglte Import Optionen
                     //ToDo: Filter auf Formular Auswahl setzen
                     var FilOut1 = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == "WA").ToList();
 
