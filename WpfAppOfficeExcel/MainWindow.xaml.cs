@@ -40,14 +40,14 @@ namespace WpfAppOfficeExcel
             get => import; 
             set => import = value; 
         }
-        public bool BEnableImportOptions 
-        { 
-            get => bEnableImportOptions; 
-            set 
-            { 
+        public bool BEnableImportOptions
+        {
+            get => bEnableImportOptions;
+            set
+            {
                 bEnableImportOptions = value;
                 OnPropertyRaised("BEnableImportOptions");
-            } 
+            }
         }
 
         //private CsvDataReader csvDataReader;
@@ -74,7 +74,7 @@ namespace WpfAppOfficeExcel
         {
             InitializeComponent();
             dt = new DispatcherTimer();
-            dt.Interval = new TimeSpan(0,0,1);
+            dt.Interval = new TimeSpan(0, 0, 1);
             dt.Tick += TimerTick;
 
             //BackgroundWorker Task
@@ -101,7 +101,7 @@ namespace WpfAppOfficeExcel
         {
             if (this.PropertyChanged != null)
                 this.PropertyChanged(this, new PropertyChangedEventArgs(propName));
-        }        
+        }
 
         private void ButtonFileOpen_Click(object sender, RoutedEventArgs e)
         {
@@ -127,8 +127,8 @@ namespace WpfAppOfficeExcel
         {
             pbStatus.Value = 0;
             ButtonOpenExcelExport.IsEnabled = false;
-            dtTimer = new DateTime(1977,12,2,0,0,0,DateTimeKind.Local);
-            
+            dtTimer = new DateTime(1977, 12, 2, 0, 0, 0, DateTimeKind.Local);
+
             if (worker != null && !worker.IsBusy)
             {
                 if (!dt.IsEnabled)
@@ -180,12 +180,12 @@ namespace WpfAppOfficeExcel
             return false;
         }
 
-        
+
 
         private void ButtonDebugFile_Click(object sender, RoutedEventArgs e)
         {
             BEnableImportOptions = true;
-            
+
             ImportInfo.ImportFileName = @"C:\Temp\Wolsdorff\Excel_Export_Macro\Tagesbericht-WT5_1010-1015_20200801-20200810.csv";
         }
 
@@ -193,14 +193,14 @@ namespace WpfAppOfficeExcel
         {
             if (File.Exists(ImportInfo.ExportFileName))
             {
-                Process pExcelExport = new Process() 
-                { 
-                    StartInfo = new ProcessStartInfo() 
-                    { 
-                        FileName = ImportInfo.ExportFileName, 
-                        UseShellExecute = true, 
+                Process pExcelExport = new Process()
+                {
+                    StartInfo = new ProcessStartInfo()
+                    {
+                        FileName = ImportInfo.ExportFileName,
+                        UseShellExecute = true,
                         Verb = "Open"
-                    } 
+                    }
                 };
 
                 pExcelExport.Start();

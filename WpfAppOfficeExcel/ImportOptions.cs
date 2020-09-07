@@ -1,5 +1,8 @@
-﻿using System;
+﻿using DocumentFormat.OpenXml.Office2010.ExcelAc;
+using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Windows.Documents;
 
 namespace WpfAppOfficeExcel.Importer
 {
@@ -50,6 +53,15 @@ namespace WpfAppOfficeExcel.Importer
             {
                 return ActiveImportOptions.ToString();
             }
+        }
+
+        public List<string> GetImportOptionsAsList()
+        {
+            List<string> listImpOpt = new List<string>();
+
+           activeImportOptions.
+
+            return listImpOpt;
         }
 
         public ImportOptions()

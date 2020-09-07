@@ -165,6 +165,7 @@ namespace WpfAppOfficeExcel
         }
 
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+
         {
             pbStatus.Value = 100;
             pbStatusRun.IsIndeterminate = false;
