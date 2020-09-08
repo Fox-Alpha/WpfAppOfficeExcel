@@ -51,6 +51,8 @@ namespace WpfAppOfficeExcel.Importer
                 }
                 else
                 {
+                    activeImportOptions ^= enumImportOptions.None;
+
                     if ((activeImportOptions & value) == value)
                     {
                         activeImportOptions &= ~value;
@@ -60,6 +62,7 @@ namespace WpfAppOfficeExcel.Importer
 
                     OnPropertyRaised("strImpOpt");
                 }
+                OnPropertyRaised("ActiveImportOptions");
             }
         }
 
