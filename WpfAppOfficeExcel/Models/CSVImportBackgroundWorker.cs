@@ -11,6 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Navigation;
 using WpfAppOfficeExcel.Models;
 
 namespace WpfAppOfficeExcel
@@ -71,20 +72,34 @@ namespace WpfAppOfficeExcel
                 (sender as BackgroundWorker).ReportProgress(30, "Filtern der Daten nach Auswahl");
                 List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
 
-                List<string> vs = Import.GetImportOptionsAsList();
+                List<string> ImportOptionShortList;
+                if ((ImportOptionShortList = Import.GetImportOptionsAsList()).Count == 0)
+                {
+                    (sender as BackgroundWorker).ReportProgress(30, "Fehler: Keine Importoptionen ausgwählt");
+                    return;
+                }
 
                 foreach (var filiale in Filialen)
                 {
                     //ToDo: Schleife durch ausgewähglte Import Optionen
                     //ToDo: Filter auf Formular Auswahl setzen
-                    var FilOut1 = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == "WA").ToList();
+                    List<CSVImportModel> FilialExportDaten = new List<CSVImportModel>();
 
-                    if (FilOut1.Count > 0)
+                    foreach (var ImportOptionName in ImportOptionShortList)
                     {
-                        FilialenExport.Add(FilOut1);
+                        var FilOut = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == ImportOptionName).ToList();
+                        FilialExportDaten.AddRange(FilOut);
+                    }
+
+                    if (FilialExportDaten.Count > 0)
+                    {
+                        FilialenExport.Add(FilialExportDaten);
                     }
                     else
-                        FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } }) ;
+                        FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } });
+
+                    //FilialExportDaten.Clear();
+                    //FilialExportDaten = null;
                 }
 
                 /*
