@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Data;
 using WpfAppOfficeExcel.Importer;
 
@@ -11,14 +12,17 @@ namespace WpfAppOfficeExcel.Converter
         {
             if (value is enumImportOptions)
             {
+                if (((enumImportOptions)value & (enumImportOptions)parameter) == (enumImportOptions.None))
+                //if ((enumImportOptions)value == enumImportOptions.None)
+                {
+                    return false;
+                }
+
                 if (((enumImportOptions)value & (enumImportOptions)parameter) == (enumImportOptions)parameter)
                     return true;
 
-                if ((enumImportOptions)value == enumImportOptions.None)
-                {
-                    return false;
-                }                    
             }
+
             enumImportOptions imp;
             var t = Enum.TryParse(parameter.ToString(), true, out imp);
 
@@ -70,6 +74,26 @@ namespace WpfAppOfficeExcel.Converter
                 return false;
             }
             return enumImportOptions.None;
+        }
+    }
+
+    public class IsEnabledImportOptionsConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (value is enumImportOptions)
+            {
+                var val = (enumImportOptions)value;
+                
+                var isNone = val.HasFlag((enumImportOptions)parameter);  // ((enumImportOptions)value & (enumImportOptions)parameter) == enumImportOptions.None;
+                return !isNone;
+            }
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            return true;
         }
     }
 }
