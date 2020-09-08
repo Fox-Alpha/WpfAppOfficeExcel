@@ -206,5 +206,11 @@ namespace WpfAppOfficeExcel
                 pExcelExport.Start();
             }
         }
+
+        private void ButtStartImport_IsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            var bin = (sender as Button).GetBindingExpression(e.Property);
+            var obj = bin.DataItem;
+        }
     }
 }
