@@ -145,7 +145,7 @@ namespace WpfAppOfficeExcel
                     worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
                     worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
 
-                    if (DeleteUnusedColoums(worksheet))
+                    if (DeleteUnusedColoums(worksheet, new int[] { 35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 4, 2, 1 }))
                     {
                         worksheet.Column( 1).Cell(1).Value = "Buchungstyp";
                         worksheet.Column( 3).Cell(1).Value = "Filiale";
@@ -226,36 +226,41 @@ namespace WpfAppOfficeExcel
             (sender as BackgroundWorker).ReportProgress(100, "Export abgeschlossen");
         }
 
-        private bool DeleteUnusedColoums(IXLWorksheet ws)
+        private bool DeleteUnusedColoums(IXLWorksheet ws, int[] IndexToDelete)
         {
-            if (ws != null)
+            if (ws != null && IndexToDelete.Length > 0)
             {
-                ws.Column(35).Delete();
-                ws.Column(34).Delete();
-                ws.Column(33).Delete();
+                foreach (var item in IndexToDelete)
+                {
+                    ws.Column(item).Delete();
+                }
 
-                ws.Column(32).Delete();
-                ws.Column(29).Delete();
-                ws.Column(25).Delete();
-                ws.Column(23).Delete();
-                ws.Column(22).Delete();
-                ws.Column(20).Delete();
+                //ws.Column(35).Delete();
+                //ws.Column(34).Delete();
+                //ws.Column(33).Delete();
 
-                ws.Column(19).Delete();
-                ws.Column(17).Delete();
-                ws.Column(16).Delete();
-                ws.Column(15).Delete();
-                ws.Column(14).Delete();
-                ws.Column(13).Delete();
-                ws.Column(12).Delete();
-                ws.Column(11).Delete();
+                //ws.Column(32).Delete();
+                //ws.Column(29).Delete();
+                //ws.Column(25).Delete();
+                //ws.Column(23).Delete();
+                //ws.Column(22).Delete();
+                //ws.Column(20).Delete();
 
-                ws.Column(9).Delete();
-                ws.Column(7).Delete();
-                ws.Column(6).Delete();
-                ws.Column(4).Delete();
-                ws.Column(2).Delete();
-                ws.Column(1).Delete();
+                //ws.Column(19).Delete();
+                //ws.Column(17).Delete();
+                //ws.Column(16).Delete();
+                //ws.Column(15).Delete();
+                //ws.Column(14).Delete();
+                //ws.Column(13).Delete();
+                //ws.Column(12).Delete();
+                //ws.Column(11).Delete();
+
+                //ws.Column(9).Delete();
+                //ws.Column(7).Delete();
+                //ws.Column(6).Delete();
+                //ws.Column(4).Delete();
+                //ws.Column(2).Delete();
+                //ws.Column(1).Delete();
 
                 
 
