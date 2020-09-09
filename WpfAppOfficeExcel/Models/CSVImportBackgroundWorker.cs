@@ -17,13 +17,14 @@ namespace WpfAppOfficeExcel
     {
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture) 
-            { 
-                AllowComments = true, 
-                Delimiter = ";", 
-                HasHeaderRecord = true, 
-                TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim, 
-                Encoding = Encoding.Default, 
+            Encoding enc = Encoding.GetEncoding("Windows-1250");
+            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                AllowComments = true,
+                Delimiter = ";",
+                HasHeaderRecord = true,
+                TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim,
+                Encoding = enc,
                 BadDataFound = BadDataResponse, 
                 ReadingExceptionOccurred = ReadExceptionResponse 
             };
