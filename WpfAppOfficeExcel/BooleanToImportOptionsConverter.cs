@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.Globalization;
 using System.Windows.Data;
 using WpfAppOfficeExcel.Importer;
@@ -83,12 +84,13 @@ namespace WpfAppOfficeExcel.Converter
         {
             if (value is enumImportOptions)
             {
-                var val = (enumImportOptions)value;
+                var val = enumImportOptions.Inventur | enumImportOptions.ProduktRetoure | enumImportOptions.ProduktVerlauf | enumImportOptions.RabattKunde | enumImportOptions.UmlagerungAusgang | enumImportOptions.UmlagerungEingang | enumImportOptions.WarenAusgang | enumImportOptions.WarenbewegungNegativ | enumImportOptions.WarenbewegungPositiv | enumImportOptions.WarenEingang;
+
+                var isNotNone = EnumsNET.FlagEnums.HasAnyFlags(typeof(enumImportOptions), value, val);
                 
-                var isNone = val.HasFlag((enumImportOptions)parameter);  // ((enumImportOptions)value & (enumImportOptions)parameter) == enumImportOptions.None;
-                return !isNone;
+                return isNotNone;
             }
-            return true;
+            return false;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
