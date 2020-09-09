@@ -1,7 +1,9 @@
 ﻿using ClosedXML.Excel;
 using CsvHelper;
 using CsvHelper.Configuration;
+using DocumentFormat.OpenXml.Drawing;
 using DocumentFormat.OpenXml.Office2016.Excel;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -17,7 +19,7 @@ namespace WpfAppOfficeExcel
     {
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
-            Encoding enc = Encoding.GetEncoding("Windows-1250");
+            Encoding enc = Encoding.GetEncoding(1252);
             CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
                 AllowComments = true,
@@ -143,7 +145,37 @@ namespace WpfAppOfficeExcel
                     worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
                     worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
 
+                    if (DeleteUnusedColoums(worksheet))
+                    {
+                        worksheet.Column( 1).Cell(1).Value = "Buchungstyp";
+                        worksheet.Column( 3).Cell(1).Value = "Filiale";
+                        worksheet.Column( 5).Cell(1).Value = "Bezeichnung";
+                        worksheet.Column( 6).Cell(1).Value = "Summe";
+                        worksheet.Column( 8).Cell(1).Value = "Eingabe Artikel Nr. EAN";
+                        worksheet.Column(10).Cell(1).Value = "Einzelpreis";
+                        worksheet.Column(12).Cell(1).Value = "Buchungs Datum";
 
+                        worksheet.SetAutoFilter();
+                        var cc = worksheet.LastCellUsed(); //.CellCount();
+                        worksheet.Columns().AdjustToContents(1, cc.Address.RowNumber);
+
+                        //worksheet.Columns("A:XFD").Select();
+                        //var x = worksheet.SelectedRanges;
+                        
+                        worksheet.Sort("D, B, C, E");
+
+                        
+                            //(worksheet.Columns().Count());
+
+
+
+
+                        //Formatieren
+                        //Druckbereich
+                        //Druckeigenschaften
+                        //Sortieren
+
+                    }
                 }
 
                 (sender as BackgroundWorker).ReportProgress(80, "Speichern Fehlerhafter Zeilen");
@@ -165,8 +197,14 @@ namespace WpfAppOfficeExcel
 
                 /*
                 * Aufräumen der Objecte und freigeben von Speicher
+                * ToDo: Encoding bei speichern korrigieren
                 */
-                workbook.SaveAs(ImportInfo.ExportFileName);
+                using (StreamWriter sw = new StreamWriter(ImportInfo.ExportFileName, false, enc))
+                {
+                    
+                    workbook.SaveAs(sw.BaseStream, new SaveOptions { EvaluateFormulasBeforeSaving = false, GenerateCalculationChain = false, ValidatePackage = false });
+                }
+
                 ErrStrLst.Clear();
                 HeaderList.Clear();
                 recList.Clear();
@@ -186,6 +224,44 @@ namespace WpfAppOfficeExcel
             */
 
             (sender as BackgroundWorker).ReportProgress(100, "Export abgeschlossen");
+        }
+
+        private bool DeleteUnusedColoums(IXLWorksheet ws)
+        {
+            if (ws != null)
+            {
+                ws.Column(35).Delete();
+                ws.Column(34).Delete();
+                ws.Column(33).Delete();
+
+                ws.Column(32).Delete();
+                ws.Column(29).Delete();
+                ws.Column(25).Delete();
+                ws.Column(23).Delete();
+                ws.Column(22).Delete();
+                ws.Column(20).Delete();
+
+                ws.Column(19).Delete();
+                ws.Column(17).Delete();
+                ws.Column(16).Delete();
+                ws.Column(15).Delete();
+                ws.Column(14).Delete();
+                ws.Column(13).Delete();
+                ws.Column(12).Delete();
+                ws.Column(11).Delete();
+
+                ws.Column(9).Delete();
+                ws.Column(7).Delete();
+                ws.Column(6).Delete();
+                ws.Column(4).Delete();
+                ws.Column(2).Delete();
+                ws.Column(1).Delete();
+
+                
+
+                return true;
+            }
+            return false;
         }
 
         private void BadDataResponse(ReadingContext obj)
