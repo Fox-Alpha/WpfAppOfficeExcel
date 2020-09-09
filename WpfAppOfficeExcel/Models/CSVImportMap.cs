@@ -15,33 +15,33 @@ namespace WpfAppOfficeExcel.Models
     {
         public CSVImportMap()
         {
-            Map(m => m.Typ);
-            Map(m => m.Mandant);//.TypeConverter<CSVImportCustomInt32Converter>();
+            Map(m => m.Typ).Ignore();
+            Map(m => m.Mandant).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.FormArt);
-            Map(m => m.FormIntern);//.TypeConverter<CSVImportCustomInt32Converter>();
+            Map(m => m.FormIntern).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.AufNr);
-            Map(m => m.IntPos);//.TypeConverter<CSVImportCustomInt32Converter>();
-            Map(m => m.UntPos);//.TypeConverter<CSVImportCustomInt32Converter>();
+            Map(m => m.IntPos).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
+            Map(m => m.UntPos).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.LagerKey);
-            Map(m => m.AnLager);
+            Map(m => m.AnLager).Ignore();
             Map(m => m.ArtikelNr);
 
-            Map(m => m.SerienNr);
-            Map(m => m.Kategorie);
-            Map(m => m.PosKat);
-            Map(m => m.BelegDatum);
-            Map(m => m.BelegZeit);
-            Map(m => m.Jahr);
-            Map(m => m.Periode);
+            Map(m => m.SerienNr).Ignore();
+            Map(m => m.Kategorie).Ignore();
+            Map(m => m.PosKat).Ignore();
+            Map(m => m.BelegDatum).Ignore();
+            Map(m => m.BelegZeit).Ignore();
+            Map(m => m.Jahr).Ignore();
+            Map(m => m.Periode).Ignore();
             Map(m => m.BuchungText);
-            Map(m => m.Bemerkung);
-            Map(m => m.Benutzer);
+            Map(m => m.Bemerkung).Ignore();
+            Map(m => m.Benutzer).Ignore();
 
             Map(m => m.Menge); 
             Map(m => m.Kontonummer);
-            Map(m => m.Kasse);
+            Map(m => m.Kasse).Ignore();
             Map(m => m.Bon);//.TypeConverter<CSVImportCustomInt32Converter>();
-            Map(m => m.BonPosition);//.TypeConverter<CSVImportCustomInt32Converter>();
+            Map(m => m.BonPosition).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.EingabeArtikelNr);
             Map(m => m.EingabeMenge); //.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.Einheitspreis);//.TypeConverter<CSVImportCustomFloatConverter>();
@@ -49,7 +49,7 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.Lieferant);
 
             Map(m => m.LieferDatum);
-            Map(m => m.LieferReferenz);
+            Map(m => m.LieferReferenz).Ignore();
             Map(m => m.Buchung); //.TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles( DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
             Map(m => m.KontrolliertAm); //.TypeConverter<CSVImportCustomDateTimeConverter>();//.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles(DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
             Map(m => m.KontrolliertDurch);
