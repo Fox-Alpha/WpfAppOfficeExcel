@@ -50,9 +50,6 @@ namespace WpfAppOfficeExcel
             }
         }
 
-        //private CsvDataReader csvDataReader;
-        //private CsvReader csvFileReader;
-
         private CSVImportInfoModel _importInfo;
 
         public CSVImportInfoModel ImportInfo
@@ -94,7 +91,7 @@ namespace WpfAppOfficeExcel
         private void TimerTick(object sender, EventArgs e)
         {
             dtTimer = dtTimer.AddSeconds(1);
-            pbStatusTextTime.Text = dtTimer.ToString("hh:mm:ss");
+            pbStatusTextTime.Text = dtTimer.ToString("HH:mm:ss");
         }
 
         public void OnPropertyRaised(string propName)
@@ -127,12 +124,16 @@ namespace WpfAppOfficeExcel
         {
             pbStatus.Value = 0;
             ButtonOpenExcelExport.IsEnabled = false;
+
             dtTimer = new DateTime(1977, 12, 2, 0, 0, 0, DateTimeKind.Local);
 
             if (worker != null && !worker.IsBusy)
             {
-                if (!dt.IsEnabled)
+                if (dt != null && !dt.IsEnabled)
+                {
                     dt.Start();
+                }
+
                 pbStatusRun.IsIndeterminate = true;
                 worker.RunWorkerAsync();
             }
