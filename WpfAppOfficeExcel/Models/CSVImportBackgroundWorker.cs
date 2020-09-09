@@ -1,6 +1,7 @@
 ﻿using ClosedXML.Excel;
 using CsvHelper;
 using CsvHelper.Configuration;
+using DocumentFormat.OpenXml.Office2016.Excel;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -32,31 +33,42 @@ namespace WpfAppOfficeExcel
                 ErrStrLst = new List<string[]>();
             }
 
+            List<CSVImportModel> recList = null;
+            List<string> HeaderList = new List<string>();
+
             using (CsvReader csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
             {
                 (sender as BackgroundWorker).ReportProgress(0, "Start Daten Import");
 
-                csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
-
-                List<CSVImportModel> recList = null;
+                csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();                
 
                 try
                 {
                     csvFileReader.Read();
                     csvFileReader.ReadHeader();
-
+                    HeaderList = (csvFileReader.Context.HeaderRecord.ToList());
                     recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
                 }
                 catch (CsvHelper.CsvHelperException ex)
                 {
                     throw new CsvHelperException(ex.ReadingContext);
                 }
-
+            }
                 (sender as BackgroundWorker).ReportProgress(15, "Daten Extrahieren");
 
-                if (recList == null)
+                if (recList == null || recList.Count == 0)
                 {
                     (sender as BackgroundWorker).ReportProgress(100, "Fehler beim Daten Extrahieren");
+                    if (recList != null)
+                    {
+                        recList.Clear();
+                        recList = null;
+                    }
+                    if (HeaderList != null)
+                    {
+                        HeaderList.Clear();
+                        HeaderList = null;
+                    }
                     return;
                 }
 
@@ -106,6 +118,7 @@ namespace WpfAppOfficeExcel
                     else
                         FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } });
                 }
+                
                 /*
                  * **********************************************************************
                  */
@@ -126,7 +139,7 @@ namespace WpfAppOfficeExcel
                         int index = Filialen.IndexOf(item);
 
                         var rowHeader = worksheet.FirstRow();
-                        worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord.ToList(), true);
+                        worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
                         worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
                     }
 
@@ -136,7 +149,7 @@ namespace WpfAppOfficeExcel
                     {
                         int row = 2;
                         var worksheet = workbook.Worksheets.Add("Fehlerliste");
-                        worksheet.Cell(1, 1).InsertData(csvFileReader.Context.HeaderRecord.ToList(), true);
+                        worksheet.Cell(1, 1).InsertData(HeaderList, true); // csvFileReader.Context.HeaderRecord.ToList(), true);
 
                         foreach (var item in ErrStrLst)
                         {
@@ -152,12 +165,14 @@ namespace WpfAppOfficeExcel
                      */
                     workbook.SaveAs(ImportInfo.ExportFileName);
                     ErrStrLst.Clear();
+                    HeaderList.Clear();
                     recList.Clear();
                     Filialen.Clear();
                     FilialenExport.Clear();
                     ImportOptionShortList.Clear();
 
                     ErrStrLst = null;
+                    HeaderList = null;
                     recList = null;
                     Filialen = null;
                     FilialenExport = null;
@@ -168,7 +183,7 @@ namespace WpfAppOfficeExcel
                  */
 
                 (sender as BackgroundWorker).ReportProgress(100, "Export abgeschlossen");
-            }
+            //}
         }
 
         private void BadDataResponse(ReadingContext obj)
