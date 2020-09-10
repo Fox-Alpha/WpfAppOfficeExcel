@@ -2,6 +2,7 @@
 using CsvHelper;
 using CsvHelper.Configuration;
 using DocumentFormat.OpenXml.Drawing;
+using DocumentFormat.OpenXml.Drawing.Charts;
 using DocumentFormat.OpenXml.Office2016.Excel;
 using System;
 using System.Collections.Generic;
@@ -17,6 +18,7 @@ namespace WpfAppOfficeExcel
 {
     public partial class MainWindow
     {
+        private int iProgress = 0;
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
             Encoding enc = Encoding.GetEncoding(1252);
@@ -41,12 +43,13 @@ namespace WpfAppOfficeExcel
 
             using (CsvReader csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
             {
-                (sender as BackgroundWorker).ReportProgress(0, "Start Daten Import");
+                (sender as BackgroundWorker).ReportProgress(iProgress=0, "Start Daten Import");
 
                 csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();                
 
                 try
                 {
+                    (sender as BackgroundWorker).ReportProgress(iProgress = 3, "Einlesen der CSV Datei ...");
                     csvFileReader.Read();
                     csvFileReader.ReadHeader();
                     HeaderList = (csvFileReader.Context.HeaderRecord.ToList());
@@ -57,7 +60,7 @@ namespace WpfAppOfficeExcel
                     throw new CsvHelperException(ex.ReadingContext);
                 }
             }
-            (sender as BackgroundWorker).ReportProgress(15, "Daten Extrahieren");
+            //(sender as BackgroundWorker).ReportProgress(iProgress+=10, "Daten Extrahieren");
 
             if (recList == null || recList.Count == 0)
             {
@@ -79,7 +82,7 @@ namespace WpfAppOfficeExcel
             * Extrahieren der Filialen ohne doppelre Einträge
             */
 
-            (sender as BackgroundWorker).ReportProgress(20, "Filialen Extrahieren und sortieren");
+            (sender as BackgroundWorker).ReportProgress(iProgress += 12, "Filialen Extrahieren und sortieren");
 
             var Filialen = recList.Select(l => l.LagerKey).GroupBy(x => x)
                             .Where(g => g.Count() > 1)
@@ -88,9 +91,11 @@ namespace WpfAppOfficeExcel
 
             Filialen.Sort();
 
+            ImportInfo.AnzahlFiliale = Filialen.Count();
+
             /************************************************/
 
-            (sender as BackgroundWorker).ReportProgress(30, "Filtern der Daten nach Auswahl");
+            (sender as BackgroundWorker).ReportProgress(iProgress += 5, "Filtern der Daten nach Auswahl");
 
             List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
 
@@ -104,9 +109,12 @@ namespace WpfAppOfficeExcel
             /*
             * Daten für jede Filiale mit jedem Filterschlüssel extrahieren
             */
+            int fi = 0;
             foreach (var filiale in Filialen)
             {
                 List<CSVImportModel> FilialExportDaten = new List<CSVImportModel>();
+
+                (sender as BackgroundWorker).ReportProgress(iProgress++, $"Filtern der Daten für Filiale {filiale} - {fi}/{Filialen.Count()}");
 
                 foreach (var ImportOptionName in ImportOptionShortList)
                 {
@@ -120,6 +128,8 @@ namespace WpfAppOfficeExcel
                 }
                 else
                     FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } });
+
+                
             }
                 
             /*
@@ -131,7 +141,7 @@ namespace WpfAppOfficeExcel
             * Datei muss existieren
             */
 
-            (sender as BackgroundWorker).ReportProgress(60, "Export zu Excel");
+            (sender as BackgroundWorker).ReportProgress(iProgress ++, "Export zu Excel");
 
             using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
             {
@@ -141,7 +151,8 @@ namespace WpfAppOfficeExcel
                     var worksheet = workbook.Worksheets.Add(item);
                     int index = Filialen.IndexOf(item);
 
-                    
+                    (sender as BackgroundWorker).ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {item} - {index} / {Filialen.Count()}");
+
                     worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
                     worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
 
@@ -174,9 +185,10 @@ namespace WpfAppOfficeExcel
                         //Druckbereich
                         //Druckeigenschaften
                     }
+                    
                 }
 
-                (sender as BackgroundWorker).ReportProgress(80, "Speichern Fehlerhafter Zeilen");
+                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
 
                 if (ErrStrLst.Count > 0)
                 {
@@ -188,10 +200,11 @@ namespace WpfAppOfficeExcel
                     {
                         worksheet.Cell(row, 1).InsertData(item.ToList(), true);
                         row++;
+                        (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
                     }
                 }
 
-                (sender as BackgroundWorker).ReportProgress(90, "Speichern der Exportdatei");
+                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern der Exportdatei");
 
                 /*
                 * Aufräumen der Objecte und freigeben von Speicher
@@ -202,6 +215,8 @@ namespace WpfAppOfficeExcel
                     
                     workbook.SaveAs(sw.BaseStream, new SaveOptions { EvaluateFormulasBeforeSaving = false, GenerateCalculationChain = false, ValidatePackage = false });
                 }
+
+                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speicher bereinigen");
 
                 ErrStrLst.Clear();
                 HeaderList.Clear();
@@ -221,7 +236,7 @@ namespace WpfAppOfficeExcel
             * *****************************************************************
             */
 
-            (sender as BackgroundWorker).ReportProgress(100, "Export abgeschlossen");
+            (sender as BackgroundWorker).ReportProgress(iProgress=100, "Export abgeschlossen");
         }
 
         private bool DeleteUnusedColoums(IXLWorksheet ws, int[] IndexToDelete)
