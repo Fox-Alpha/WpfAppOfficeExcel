@@ -29,6 +29,12 @@
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
+        <!--Menü-->
+        <Menu Grid.Row="0" Grid.ColumnSpan="4" x:Name="MainMenu">
+            <MenuItem Header="Datei" Name="MainMenuFile">
+                <MenuItem Header="Beenen"/>
+            </MenuItem>
+        </Menu>
         <!--Dateiauswahl für Import-->
         <StackPanel  Grid.Column="1" Grid.Row="1" Margin="5" HorizontalAlignment="Stretch">
             <TextBlock Text="Datei Auswahl" Padding="3"/>
@@ -52,7 +58,7 @@
                 <TextBlock x:Name="pbStatusText" Text="STATUS" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
             <Button x:Name="ButtonOpenExcelExport" Content="Export öffnen" Margin="5" Click="ButtonOpenExcelExport_Click" IsEnabled="False"/>
-            <Button x:Name="ButtonSaveExportAs" Click="ButtonSaveExportAs_Click" Content="Export speichern unter ..." Margin="5" Padding="5,0,5,0" Height="20"/>
+            <Button x:Name="ButtonSaveExportAs" Click="ButtonSaveExportAs_Click" Content="Export speichern unter ..." Margin="5" Padding="5,0,5,0" Height="20" IsEnabled="False"/>
 
         </StackPanel>
 
@@ -144,5 +150,9 @@
                     NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="ButtStartImport_Click" Margin="2" IsEnabledChanged="ButtStartImport_IsEnabledChanged"/>
             </StackPanel>
         </GroupBox>
+        <!--Statuszeile-->
+        <StatusBar Grid.Row="4" Grid.ColumnSpan="4">
+            <StatusBarItem x:Name="StatusBarText" Content="Hallo Welt"/>
+        </StatusBar>
     </Grid>
 </Window>
