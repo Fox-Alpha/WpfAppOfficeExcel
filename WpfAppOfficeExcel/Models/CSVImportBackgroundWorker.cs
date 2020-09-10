@@ -109,7 +109,7 @@ namespace WpfAppOfficeExcel
             /*
             * Daten für jede Filiale mit jedem Filterschlüssel extrahieren
             */
-            int fi = 0;
+            int fi = 1;
             foreach (var filiale in Filialen)
             {
                 List<CSVImportModel> FilialExportDaten = new List<CSVImportModel>();
@@ -129,7 +129,7 @@ namespace WpfAppOfficeExcel
                 else
                     FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } });
 
-                
+                fi++;
             }
                 
             /*
@@ -267,7 +267,7 @@ namespace WpfAppOfficeExcel
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
 
         {
-            pbStatus.Value = 100;
+            pbStatus.Value = pbStatus.Maximum;
             pbStatusRun.IsIndeterminate = false;
             ButtonOpenExcelExport.IsEnabled = true;
             BEnableImportOptions = true;
