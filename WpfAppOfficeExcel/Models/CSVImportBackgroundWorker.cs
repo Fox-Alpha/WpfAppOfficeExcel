@@ -133,7 +133,7 @@ namespace WpfAppOfficeExcel
 
             (sender as BackgroundWorker).ReportProgress(60, "Export zu Excel");
 
-            using (var workbook = new XLWorkbook())
+            using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
             {
                 Debug.WriteLine($"Filialen: {Filialen.Count} == Exports: {FilialenExport.Count}");
                 foreach (var item in Filialen)
@@ -141,40 +141,38 @@ namespace WpfAppOfficeExcel
                     var worksheet = workbook.Worksheets.Add(item);
                     int index = Filialen.IndexOf(item);
 
-                    var rowHeader = worksheet.FirstRow();
+                    
                     worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
                     worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
 
-                    if (DeleteUnusedColoums(worksheet, new int[] { 35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 4, 2, 1 }))
+                    if (DeleteUnusedColoums(worksheet, new int[] { 35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 }))
                     {
+
+                        //Umbenennen der Überschriften
                         worksheet.Column( 1).Cell(1).Value = "Buchungstyp";
-                        worksheet.Column( 3).Cell(1).Value = "Filiale";
-                        worksheet.Column( 5).Cell(1).Value = "Bezeichnung";
-                        worksheet.Column( 6).Cell(1).Value = "Summe";
-                        worksheet.Column( 8).Cell(1).Value = "Eingabe Artikel Nr. EAN";
-                        worksheet.Column(10).Cell(1).Value = "Einzelpreis";
-                        worksheet.Column(12).Cell(1).Value = "Buchungs Datum";
+                        worksheet.Column( 2).Cell(1).Value = "Filiale";
+                        worksheet.Column( 3).Cell(1).Value = "Warengruppe";
+                        worksheet.Column( 4).Cell(1).Value = "Bezeichnung";
+                        worksheet.Column( 5).Cell(1).Value = "Summe";
+                        worksheet.Column( 7).Cell(1).Value = "Eingabe Artikel Nr. EAN";
+                        worksheet.Column(9).Cell(1).Value = "Einzelpreis";
+                        worksheet.Column(11).Cell(1).Value = "Buchungs Datum";
 
-                        worksheet.SetAutoFilter();
-                        var cc = worksheet.LastCellUsed(); //.CellCount();
+                        ////Sortieren der Daten
+                        var cc = worksheet.LastCellUsed();
+                        var s = $"A2:{cc.Address.ToString()}";
+                        var range = worksheet.Range(s);
+                        range.Sort("F, C, D, E");
+
+                        //Autofilter und Spaltenbreite an Inhalt anpassen
+                        worksheet.RangeUsed().SetAutoFilter();
+                        
                         worksheet.Columns().AdjustToContents(1, cc.Address.RowNumber);
-
-                        //worksheet.Columns("A:XFD").Select();
-                        //var x = worksheet.SelectedRanges;
-                        
-                        worksheet.Sort("D, B, C, E");
-
-                        
-                            //(worksheet.Columns().Count());
-
-
-
+                        worksheet.Row(1).Style.Font.SetBold();
 
                         //Formatieren
                         //Druckbereich
                         //Druckeigenschaften
-                        //Sortieren
-
                     }
                 }
 
@@ -234,36 +232,6 @@ namespace WpfAppOfficeExcel
                 {
                     ws.Column(item).Delete();
                 }
-
-                //ws.Column(35).Delete();
-                //ws.Column(34).Delete();
-                //ws.Column(33).Delete();
-
-                //ws.Column(32).Delete();
-                //ws.Column(29).Delete();
-                //ws.Column(25).Delete();
-                //ws.Column(23).Delete();
-                //ws.Column(22).Delete();
-                //ws.Column(20).Delete();
-
-                //ws.Column(19).Delete();
-                //ws.Column(17).Delete();
-                //ws.Column(16).Delete();
-                //ws.Column(15).Delete();
-                //ws.Column(14).Delete();
-                //ws.Column(13).Delete();
-                //ws.Column(12).Delete();
-                //ws.Column(11).Delete();
-
-                //ws.Column(9).Delete();
-                //ws.Column(7).Delete();
-                //ws.Column(6).Delete();
-                //ws.Column(4).Delete();
-                //ws.Column(2).Delete();
-                //ws.Column(1).Delete();
-
-                
-
                 return true;
             }
             return false;
