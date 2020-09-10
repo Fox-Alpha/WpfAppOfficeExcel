@@ -79,6 +79,10 @@ namespace WpfAppOfficeExcel
         public MainWindow()
         {
             InitializeComponent();
+#if !DEBUG
+            ButtonDebugFile.Visibility = Visibility.Hidden;
+            ButtonDebugFile.IsEnabled = false;
+#endif
             dt = new DispatcherTimer();
             dt.Interval = new TimeSpan(0, 0, 1);
             dt.Tick += TimerTick;
