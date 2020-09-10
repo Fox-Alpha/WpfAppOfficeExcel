@@ -260,6 +260,11 @@ namespace WpfAppOfficeExcel
             //Timer für Messung stoppen
             if(dt.IsEnabled)
                 dt.Stop();
+
+            if (OpenExportAfterSave == true)
+            {
+                OpenExcelExport();
+            }
         }
     }
 }

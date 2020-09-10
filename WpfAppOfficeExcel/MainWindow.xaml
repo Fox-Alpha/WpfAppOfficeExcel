@@ -8,14 +8,14 @@
         xmlns:converter="clr-namespace:WpfAppOfficeExcel.Converter"
         xmlns:diag="clr-namespace:System.Diagnostics;assembly=WindowsBase"
         mc:Ignorable="d"
-        Title="CSV zu Excel Importer Lekkerland" Height="450" MinWidth="700" Width="700">
+        Title="CSV zu Excel Importer Lekkerland" Height="450" MinWidth="740" Width="740">
     <Window.Resources>
         <converter:BooleanToImportOptionsConverter x:Key="BooleanToImportOptionsConverter"/>
         <converter:IsEnabledImportOptionsConverter x:Key="IsEnabledImportOptionsConverter"/>
-        
+
     </Window.Resources>
-        
-        <Grid  Background="AliceBlue">
+
+    <Grid  Background="AliceBlue">
         <Grid.RowDefinitions>
             <RowDefinition Height="20"/>
             <RowDefinition Height="auto"/>
@@ -24,12 +24,12 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="auto" MaxWidth="460"/>
-            <ColumnDefinition MinWidth="230" MaxWidth="250"/>
+            <ColumnDefinition Width="auto" MaxWidth="460"/>         <!--Dateiauswahl und Fortschritt-->
+            <ColumnDefinition MinWidth="230" MaxWidth="280"/>       <!--Import Optionen-->
             <ColumnDefinition Width="20"/>
         </Grid.ColumnDefinitions>
 
-            <!--Dateiauswahl für Import-->
+        <!--Dateiauswahl für Import-->
         <StackPanel  Grid.Column="1" Grid.Row="1" Margin="5" HorizontalAlignment="Stretch">
             <TextBlock Text="Datei Auswahl" Padding="3"/>
             <StackPanel Margin="0,0,0,0" Orientation="Horizontal">
@@ -37,7 +37,10 @@
                 <Button x:Name="ButtonFileOpen" Click="ButtonFileOpen_Click" Content="Dateiauswahl" Margin="5" Padding="5,0,5,0" Height="20"/>
                 <Button x:Name="ButtonDebugFile" Click="ButtonDebugFile_Click" Content="DEBUGG" Margin="5"/>
             </StackPanel>
+            <CheckBox Content="Export automatisch in Excel öffnen ?" IsChecked="{Binding OpenExportAfterSave, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0"/>
             <TextBlock Text="{Binding ImportInfo.ImportFileName, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,10" Padding="3" x:Name="tbFilePathInfo" TextTrimming="WordEllipsis" MaxWidth="350"/>
+            
+            <!--Aktivitäts Anzeige-->
             <Grid Margin="5" HorizontalAlignment="Stretch">
                 <ProgressBar Minimum="0" Maximum="100" Value="0" Name="pbStatusRun"/>
                 <TextBlock x:Name="pbStatusTextTime" Text="{Binding dtTimer,StringFormat='HH:mm:ss'}"  HorizontalAlignment="Center" VerticalAlignment="Center"/>
@@ -48,16 +51,16 @@
                 <TextBlock x:Name="pbStatusText" Text="STATUS" HorizontalAlignment="Center" VerticalAlignment="Center"/>
             </Grid>
             <Button x:Name="ButtonOpenExcelExport" Content="Export öffnen" Margin="5" Click="ButtonOpenExcelExport_Click" IsEnabled="False"/>
-            
+
         </StackPanel>
 
-            <!--Optionen Auswahl für Import-->
+        <!--Groupbox mit Optionen Auswahl für Import-->
         <GroupBox Grid.Row="1" Grid.Column="2" x:Name="gbSelectOptionForImport" 
-                  IsEnabled="{Binding BEnableImportOptions, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Width="227" MaxWidth="230">
+                  IsEnabled="{Binding BEnableImportOptions, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" MinWidth="260" MaxWidth="280" Margin="12,0">
             <GroupBox.Header>
                 <TextBlock Text="Import Auswahl"/>
             </GroupBox.Header>
-            <StackPanel Margin="5" MinWidth="150" MaxWidth="230" Width="230">
+            <StackPanel Margin="5" MinWidth="230" MaxWidth="230">
                 <CheckBox x:Name="cbWareneingang" Content="WE - Wareneingang" Margin="2" 
                     IsChecked="{Binding Path=Import.ActiveImportOptions,
                     Converter={StaticResource BooleanToImportOptionsConverter}, 
@@ -126,10 +129,10 @@
                     diag:PresentationTraceSources.TraceLevel=None,
                     NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True,
                     UpdateSourceTrigger=PropertyChanged}"/>
-                
-            <!--</StackPanel>-->
-            <!--Starten des Imports-->
-            <!--<StackPanel Grid.Row="2" Grid.Column="2">-->
+
+                <!--</StackPanel>-->
+                <!--Starten des Imports-->
+                <!--<StackPanel Grid.Row="2" Grid.Column="2">-->
                 <TextBlock Text="{Binding Import.strImpOpt,
                     NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" TextWrapping="Wrap" Margin="0,10,0,0"/>
                 <Button x:Name="ButtStartImport" Content="Import starten" IsEnabled="{Binding Path=Import.ActiveImportOptions,
@@ -138,6 +141,6 @@
                     diag:PresentationTraceSources.TraceLevel=High,
                     NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="ButtStartImport_Click" Margin="2" IsEnabledChanged="ButtStartImport_IsEnabledChanged"/>
             </StackPanel>
-        </GroupBox> 
+        </GroupBox>
     </Grid>
 </Window>

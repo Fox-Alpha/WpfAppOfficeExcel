@@ -50,6 +50,15 @@ namespace WpfAppOfficeExcel
             }
         }
 
+        private bool openExportAfterSave;
+
+        public bool OpenExportAfterSave
+        {
+            get { return openExportAfterSave; }
+            set { openExportAfterSave = value; }
+        }
+
+
         private CSVImportInfoModel _importInfo;
 
         public CSVImportInfoModel ImportInfo
@@ -192,6 +201,11 @@ namespace WpfAppOfficeExcel
 
         private void ButtonOpenExcelExport_Click(object sender, RoutedEventArgs e)
         {
+            OpenExcelExport();
+        }
+
+        private void OpenExcelExport()
+        {
             if (File.Exists(ImportInfo.ExportFileName))
             {
                 Process pExcelExport = new Process()
@@ -200,6 +214,7 @@ namespace WpfAppOfficeExcel
                     {
                         FileName = ImportInfo.ExportFileName,
                         UseShellExecute = true,
+                        WindowStyle = ProcessWindowStyle.Maximized,
                         Verb = "Open"
                     }
                 };
