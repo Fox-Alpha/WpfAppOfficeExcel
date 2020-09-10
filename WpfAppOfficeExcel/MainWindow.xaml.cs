@@ -232,5 +232,26 @@ namespace WpfAppOfficeExcel
             var bin = (sender as Button).GetBindingExpression(e.Property);
             var obj = bin.DataItem;
         }
+
+        private void ButtonSaveExportAs_Click(object sender, RoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog()
+            {
+                DefaultExt = ".CSV",
+                Title = "Eine Datei für den Import auswählen",
+                CheckFileExists = true,
+                Filter = "Csv files (*.csv)|*.csv|Alle Dateien (*.*)|*.*",
+                FilterIndex = 0
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                ImportInfo.ExportFileName = saveFileDialog.FileName;
+
+                /*
+                 * ToDo: export.xlsx zum ausgewählten Ort kopieren
+                 */
+            }
+        }
     }
 }
