@@ -50,7 +50,7 @@ namespace WpfAppOfficeExcel.Models
 
             Map(m => m.LieferDatum);
             Map(m => m.LieferReferenz).Ignore();
-            Map(m => m.Buchung); //.TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles( DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
+            Map(m => m.Buchung).TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles( DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
             Map(m => m.KontrolliertAm).Ignore(); //.TypeConverter<CSVImportCustomDateTimeConverter>();//.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles(DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
             Map(m => m.KontrolliertDurch).Ignore();
         }

@@ -55,7 +55,8 @@ namespace WpfAppOfficeExcel.Models.Converter
 
     public class CSVImportCustomDateTimeConverter : DefaultTypeConverter
     {
-        //private string CustomDateFormat = @"yyyy-MM-dd'T'hh:mm:ss'.'FFF";
+        private string CustomDateFormat = @"yyyy-MM-dd'T'hh:mm:ss'.'FFF";
+        //private string CustomDateFormat = @"dd/MM/yyyy";
 
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
@@ -63,26 +64,30 @@ namespace WpfAppOfficeExcel.Models.Converter
 
             if (text == "?" || string.IsNullOrEmpty(text))
             {
+                return "n/a";
+            }
+
+            try
+            {
+                //newDate = DateTime.Parse(text, CultureInfo.InvariantCulture);
+
+                newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture);
+
+                //GetCultureInfo("de-DE")CurrentCulture.DateTimeFormat
+                //newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture); //); //, CultureInfo.InvariantCulture, DateTimeStyles.None); //, );
+                //newDate.
                 //2019-04-01T20:08:13.929
                 //memberMapData.TypeConverterOptions.CultureInfo = CultureInfo.GetCultureInfo("de-DE");
                 //memberMapData.TypeConverterOptions.DateTimeStyle = DateTimeStyles.AssumeLocal;
                 //memberMapData.TypeConverterOptions.Formats = new string[] { "dd.MM.yyyy hh:mm:ss"};
                 //memberMapData.TypeConverterOptions.
-                
-                
+
+
                 //DateTime dt = new DateTime(1970,12,01);
                 //dt.Kind = DateTimeKind.Local;
                 //"01.01.1970 00:00:00"
                 //newDate = DateTime.ParseExact("01.01.1970 12:00:00", @"dd.MM.yyyy hh:mm:ss",  CultureInfo.InvariantCulture);
-                return null; // newDate; // base.ConvertFromString(newDate.ToString(), row, memberMapData); 
-            }
-
-            try
-            {
-                newDate = DateTime.Parse(text, CultureInfo.InvariantCulture);
-                //GetCultureInfo("de-DE")CurrentCulture.DateTimeFormat
-                //newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture); //); //, CultureInfo.InvariantCulture, DateTimeStyles.None); //, );
-                //newDate.
+                //  return null; // newDate; // base.ConvertFromString(newDate.ToString(), row, memberMapData); 
             }
             catch (Exception ex)
             {
