@@ -270,6 +270,7 @@ namespace WpfAppOfficeExcel
             pbStatus.Value = pbStatus.Maximum;
             pbStatusRun.IsIndeterminate = false;
             ButtonOpenExcelExport.IsEnabled = true;
+            ButtonSaveExportAs.IsEnabled = true;
             BEnableImportOptions = true;
 
             //Timer für Messung stoppen

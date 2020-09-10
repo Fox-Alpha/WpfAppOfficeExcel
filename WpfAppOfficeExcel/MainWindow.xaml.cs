@@ -137,6 +137,7 @@ namespace WpfAppOfficeExcel
         {
             pbStatus.Value = 0;
             ButtonOpenExcelExport.IsEnabled = false;
+            ButtonSaveExportAs.IsEnabled = false;
 
             dtTimer = new DateTime(1977, 12, 2, 0, 0, 0, DateTimeKind.Local);
 
@@ -239,13 +240,16 @@ namespace WpfAppOfficeExcel
             {
                 DefaultExt = ".CSV",
                 Title = "Eine Datei für den Import auswählen",
-                CheckFileExists = true,
+                //CheckFileExists = true,
+                CheckPathExists = true,
                 Filter = "Csv files (*.csv)|*.csv|Alle Dateien (*.*)|*.*",
                 FilterIndex = 0
             };
 
             if (saveFileDialog.ShowDialog() == true)
             {
+                File.Copy(ImportInfo.ExportFileName, saveFileDialog.FileName, false);
+
                 ImportInfo.ExportFileName = saveFileDialog.FileName;
 
                 /*
