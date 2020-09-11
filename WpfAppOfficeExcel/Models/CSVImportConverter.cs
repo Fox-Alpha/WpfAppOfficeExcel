@@ -60,7 +60,7 @@ namespace WpfAppOfficeExcel.Models.Converter
 
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
-            DateTime newDate = default;
+            //DateTime newDate = default;
 
             if (text == "?" || string.IsNullOrEmpty(text))
             {
@@ -71,7 +71,7 @@ namespace WpfAppOfficeExcel.Models.Converter
             {
                 //newDate = DateTime.Parse(text, CultureInfo.InvariantCulture);
 
-                newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture);
+                //newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture);
 
                 //GetCultureInfo("de-DE")CurrentCulture.DateTimeFormat
                 //newDate = DateTime.ParseExact(text, CustomDateFormat, CultureInfo.InvariantCulture); //); //, CultureInfo.InvariantCulture, DateTimeStyles.None); //, );
@@ -94,7 +94,7 @@ namespace WpfAppOfficeExcel.Models.Converter
                 Debug.WriteLine(String.Format(@"Error parsing date '{0}': {1}", text, ex.Message));
             }
 
-            return newDate;
+            return text;
 
             //return base.ConvertFromString(text, row, memberMapData);    
         }
