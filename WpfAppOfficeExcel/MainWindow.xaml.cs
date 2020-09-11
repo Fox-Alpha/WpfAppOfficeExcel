@@ -92,6 +92,7 @@ namespace WpfAppOfficeExcel
             worker.DoWork += worker_DoWork;
             worker.ProgressChanged += worker_ProgressChanged;
             worker.RunWorkerCompleted += worker_RunWorkerCompleted;
+            worker.WorkerSupportsCancellation = true;
 
             Import = new ImportOptions();
 
@@ -150,6 +151,12 @@ namespace WpfAppOfficeExcel
 
                 pbStatusRun.IsIndeterminate = true;
                 worker.RunWorkerAsync();
+
+                if (worker.IsBusy)
+                {
+                    ButtCancelImport.IsEnabled = true;
+                    ButtCancelImport.Visibility = System.Windows.Visibility.Visible;
+                }
             }
             else
                 BEnableImportOptions = false;
@@ -256,6 +263,18 @@ namespace WpfAppOfficeExcel
                  * ToDo: export.xlsx zum ausgewählten Ort kopieren
                  */
             }
+        }
+
+        private void ButtCancelImport_Click(object sender, RoutedEventArgs e)
+        {
+            if (worker.WorkerSupportsCancellation == true && worker.IsBusy)
+            {
+                // Cancel the asynchronous operation.
+                worker.CancelAsync();
+            }
+            
+            ButtCancelImport.IsEnabled = false;
+            ButtCancelImport.Visibility = System.Windows.Visibility.Collapsed;
         }
     }
 }

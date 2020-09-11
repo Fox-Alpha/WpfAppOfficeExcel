@@ -148,6 +148,7 @@
                     ConverterParameter={x:Static importer:enumImportOptions.None}, 
                     diag:PresentationTraceSources.TraceLevel=High,
                     NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Click="ButtStartImport_Click" Margin="2" IsEnabledChanged="ButtStartImport_IsEnabledChanged"/>
+                <Button x:Name="ButtCancelImport" Content="Import abrechen" Click="ButtCancelImport_Click" Visibility="Collapsed" IsEnabled="False"/>
             </StackPanel>
         </GroupBox>
         <!--Statuszeile-->
