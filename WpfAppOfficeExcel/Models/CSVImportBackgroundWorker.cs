@@ -12,59 +12,63 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using WpfAppOfficeExcel.Models;
 
 namespace WpfAppOfficeExcel
 {
     public partial class MainWindow
     {
+        //Zähler für den Import/Export Fortschritt
         private int iProgress = 0;
+
+        /// <summary>
+        /// Backgroundworker Main Function
+        /// </summary>
+        /// <param name="sender">Backgroundworker Instanz</param>
+        /// <param name="e">Backgroundworker Argumente</param>
         void worker_DoWork(object sender, DoWorkEventArgs e)
         {
+            BackgroundWorker bgworker = sender as BackgroundWorker;
+
             Encoding enc = Encoding.GetEncoding(1252);
-            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+
+            int[] CoulumnsToDelete = new int[] 
+                { 
+                    35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 
+                };
+            int[] IndexToRename = new int[] 
             {
-                AllowComments = true,
-                Delimiter = ";",
-                HasHeaderRecord = true,
-                TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim,
-                Encoding = enc,
-                BadDataFound = BadDataResponse, 
-                ReadingExceptionOccurred = ReadExceptionResponse 
+                1, 2, 3, 4, 5, 7, 9, 11
+            };
+            string[] ColumnNames = new string[]
+            {
+                "Buchungstyp",
+                "Filiale",
+                "Warengruppe",
+                "Bezeichnung",
+                "Summe",
+                "Eingabe Artikel Nr. EAN",
+                "Einzelpreis",
+                "Buchungs Datum"
             };
 
-            if (ErrStrLst == null)
-            {
-                ErrStrLst = new List<string[]>();
-            }
+            List<string[]> ErrStrLst = new List<string[]>();
 
-            List<CSVImportModel> recList = null;
+            List<CSVImportModel> recList;
             List<string> HeaderList = new List<string>();
 
-            using (CsvReader csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
+            bgworker.ReportProgress(iProgress = 3, "Starten des Datenimport. Einlesen der CSV Datei ...");
+
+            if (!CSVImportReadFile(out HeaderList, out recList) || bgworker.CancellationPending)
             {
-                (sender as BackgroundWorker).ReportProgress(iProgress=0, "Start Daten Import");
-
-                csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();                
-
-                try
-                {
-                    (sender as BackgroundWorker).ReportProgress(iProgress = 3, "Einlesen der CSV Datei ...");
-                    csvFileReader.Read();
-                    csvFileReader.ReadHeader();
-                    HeaderList = (csvFileReader.Context.HeaderRecord.ToList());
-                    recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
-                }
-                catch (CsvHelper.CsvHelperException ex)
-                {
-                    throw new CsvHelperException(ex.ReadingContext);
-                }
+                e.Cancel = true;
             }
-            //(sender as BackgroundWorker).ReportProgress(iProgress+=10, "Daten Extrahieren");
 
+            //Fehler, wenn keine Daten gelesen wurden
             if (recList == null || recList.Count == 0)
             {
-                (sender as BackgroundWorker).ReportProgress(100, "Fehler beim Daten Extrahieren");
+                bgworker.ReportProgress(100, "Fehler beim Daten Extrahieren");
                 if (recList != null)
                 {
                     recList.Clear();
@@ -75,15 +79,151 @@ namespace WpfAppOfficeExcel
                     HeaderList.Clear();
                     HeaderList = null;
                 }
-                return;
+                e.Cancel = true;    //bgw abruch signalisieren
             }
 
-            /*
-            * Extrahieren der Filialen ohne doppelre Einträge
-            */
+            if (!e.Cancel && !bgworker.CancellationPending)
+            {
+                bgworker.ReportProgress(iProgress += 7, "Filialen Extrahieren und sortieren");
+                List<string> Filialen = GetFilialListe(recList);
+                List<CSVImportModel> FilialenExport = new List<CSVImportModel>();
 
-            (sender as BackgroundWorker).ReportProgress(iProgress += 12, "Filialen Extrahieren und sortieren");
+                using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
+                {
+                    int fi = 1;
 
+                    foreach (var filiale in Filialen)
+                    {
+                        bgworker.ReportProgress(iProgress++, $"Filtern der Daten für Filiale {filiale} - {fi}/{Filialen.Count()}");
+
+                        FilialenExport = GetFilialDataForExport(recList, filiale);
+
+                        if (FilialenExport != null && FilialenExport.Count > 0)
+                        {
+                            bgworker.ReportProgress(iProgress++, "Export zu Excel");
+
+                            var worksheet = workbook.Worksheets.Add(filiale);
+
+                            SaveFilialDataToWorksheet(HeaderList, FilialenExport, worksheet);
+
+                            bgworker.ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {filiale} - {fi} / {Filialen.Count()}");
+                            if (DeleteUnusedColoumns(worksheet, CoulumnsToDelete))
+                            {
+                                RenameCoulumns(worksheet, IndexToRename, ColumnNames);
+
+                                SortAndFormatXlsSheet(worksheet);
+                            }
+                            fi++;
+                        }
+                        else if (FilialenExport != null && FilialenExport.Count == 0)
+                        {
+                            bgworker.ReportProgress(iProgress++, $"Keine Daten für Filiale {filiale} für Export gefunden");
+                        }
+                        else
+                        {
+                            e.Cancel = true;
+                            break;
+                        }
+
+                        if (e.Cancel || bgworker.CancellationPending)
+                        {
+                            e.Cancel = true;
+                            break;
+                        }
+                    }
+                    recList.Clear();
+                    recList = null;
+
+                    bgworker.ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
+                    SaveErrorData(ErrStrLst, HeaderList, workbook);
+
+                    if (!e.Cancel && !bgworker.CancellationPending)
+                    {
+                        bgworker.ReportProgress(iProgress++, "Speichern der Exportdatei");
+
+                        using (StreamWriter sw = new StreamWriter(ImportInfo.ExportFileName, false, enc))
+                        {
+                            workbook.SaveAs(sw.BaseStream,
+                                            new SaveOptions
+                                            {
+                                                EvaluateFormulasBeforeSaving = false,
+                                                GenerateCalculationChain = false,
+                                                ValidatePackage = false
+                                            });
+                            bgworker.ReportProgress(iProgress = 100, "Export abgeschlossen");
+                        }
+                    }
+                }
+                /*
+                * Aufräumen der Objecte und freigeben von Speicher
+                */
+                Filialen.Clear();
+                FilialenExport.Clear();
+                Filialen = null;
+                FilialenExport = null;
+            }
+
+            ErrStrLst.Clear();
+            HeaderList.Clear();
+
+            ErrStrLst = null;
+            HeaderList = null;
+        }
+
+        /// <summary>
+        /// Einlesen der Rohdaten in den Speicher zum weiteren bearbeiten
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="HeaderList"></param>
+        /// <param name="recList"></param>
+        /// <returns></returns>
+        private bool CSVImportReadFile(out List<string> HeaderList, out List<CSVImportModel> recList)
+        {
+            bool hasData = false;
+            recList = new List<CSVImportModel>();
+            HeaderList = new List<string>();
+            Encoding enc = Encoding.GetEncoding(1252);
+
+            CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
+            {
+                AllowComments = true,
+                Delimiter = ";",
+                HasHeaderRecord = true,
+                TrimOptions = TrimOptions.InsideQuotes | TrimOptions.Trim,
+                Encoding = enc,
+                BadDataFound = BadDataResponse,
+                ReadingExceptionOccurred = ReadExceptionResponse
+            };
+
+            using (CsvReader csvFileReader = new CsvReader(new StreamReader(ImportInfo.ImportFileName), csvConfig))
+            {
+                csvFileReader.Configuration.RegisterClassMap<CSVImportMap>();
+
+                try
+                {
+                    csvFileReader.Read();
+                    csvFileReader.ReadHeader();
+                    HeaderList = csvFileReader.Context.HeaderRecord.ToList();
+                    recList = csvFileReader.GetRecords<CSVImportModel>().ToList();
+                    hasData = true;
+                }
+                catch (CsvHelper.CsvHelperException ex)
+                {
+                    throw new CsvHelperException(ex.ReadingContext);
+                }
+            }
+            return hasData;
+        }
+
+        /// <summary>
+        /// Die Filialliste aus den Daten erstellen
+        /// Zum anlegen der einzelnen Arbeitsblätter
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="recList"></param>
+        /// <returns></returns>
+        private List<string> GetFilialListe(List<CSVImportModel> recList)
+        {
             var Filialen = recList.Select(l => l.LagerKey).GroupBy(x => x)
                             .Where(g => g.Count() > 1)
                             .Select(g => g.Key)
@@ -92,154 +232,76 @@ namespace WpfAppOfficeExcel
             Filialen.Sort();
 
             ImportInfo.AnzahlFiliale = Filialen.Count();
-
-            /************************************************/
-
-            (sender as BackgroundWorker).ReportProgress(iProgress += 5, "Filtern der Daten nach Auswahl");
-
-            List<List<CSVImportModel>> FilialenExport = new List<List<CSVImportModel>>();
-
-            List<string> ImportOptionShortList;
-            if ((ImportOptionShortList = Import.GetImportOptionsAsList()).Count == 0)
-            {
-                (sender as BackgroundWorker).ReportProgress(100, "Fehler: Keine Importoptionen ausgwählt");
-                return;
-            }
-
-            /*
-            * Daten für jede Filiale mit jedem Filterschlüssel extrahieren
-            */
-            int fi = 1;
-            foreach (var filiale in Filialen)
-            {
-                List<CSVImportModel> FilialExportDaten = new List<CSVImportModel>();
-
-                (sender as BackgroundWorker).ReportProgress(iProgress++, $"Filtern der Daten für Filiale {filiale} - {fi}/{Filialen.Count()}");
-
-                foreach (var ImportOptionName in ImportOptionShortList)
-                {
-                    var FilOut = recList.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == ImportOptionName).ToList();
-                    FilialExportDaten.AddRange(FilOut);
-                }
-
-                if (FilialExportDaten.Count > 0)
-                {
-                    FilialenExport.Add(FilialExportDaten);
-                }
-                else
-                    FilialenExport.Add(new List<CSVImportModel>() { new CSVImportModel() { LagerKey = filiale, Bemerkung = "Keine Daten vorhanden" } });
-
-                fi++;
-            }
-                
-            /*
-            * **********************************************************************
-            */
-
-            /*
-            * Excel Export mit ClosedXML
-            * Datei muss existieren
-            */
-
-            (sender as BackgroundWorker).ReportProgress(iProgress ++, "Export zu Excel");
-
-            using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
-            {
-                Debug.WriteLine($"Filialen: {Filialen.Count} == Exports: {FilialenExport.Count}");
-                foreach (var item in Filialen)
-                {
-                    var worksheet = workbook.Worksheets.Add(item);
-                    int index = Filialen.IndexOf(item);
-
-                    (sender as BackgroundWorker).ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {item} - {index} / {Filialen.Count()}");
-
-                    worksheet.Cell(1, 1).InsertData(HeaderList, true);//csvFileReader.Context.HeaderRecord.ToList(), true);
-                    worksheet.Cell(2, 1).InsertData(FilialenExport[index]);
-
-                    if (DeleteUnusedColoums(worksheet, new int[] { 35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 }))
-                    {
-
-                        //Umbenennen der Überschriften
-                        worksheet.Column( 1).Cell(1).Value = "Buchungstyp";
-                        worksheet.Column( 2).Cell(1).Value = "Filiale";
-                        worksheet.Column( 3).Cell(1).Value = "Warengruppe";
-                        worksheet.Column( 4).Cell(1).Value = "Bezeichnung";
-                        worksheet.Column( 5).Cell(1).Value = "Summe";
-                        worksheet.Column( 7).Cell(1).Value = "Eingabe Artikel Nr. EAN";
-                        worksheet.Column(9).Cell(1).Value = "Einzelpreis";
-                        worksheet.Column(11).Cell(1).Value = "Buchungs Datum";
-
-                        ////Sortieren der Daten
-                        var cc = worksheet.LastCellUsed();
-                        var s = $"A2:{cc.Address.ToString()}";
-                        var range = worksheet.Range(s);
-                        range.Sort("F, C, D, E");
-
-                        //Autofilter und Spaltenbreite an Inhalt anpassen
-                        worksheet.RangeUsed().SetAutoFilter();
-                        
-                        worksheet.Columns().AdjustToContents(1, cc.Address.RowNumber);
-                        worksheet.Row(1).Style.Font.SetBold();
-
-                        //Formatieren
-                        //Druckbereich
-                        //Druckeigenschaften
-                    }
-                    
-                }
-
-                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
-
-                if (ErrStrLst.Count > 0)
-                {
-                    int row = 2;
-                    var worksheet = workbook.Worksheets.Add("Fehlerliste");
-                    worksheet.Cell(1, 1).InsertData(HeaderList, true); // csvFileReader.Context.HeaderRecord.ToList(), true);
-
-                    foreach (var item in ErrStrLst)
-                    {
-                        worksheet.Cell(row, 1).InsertData(item.ToList(), true);
-                        row++;
-                        (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
-                    }
-                }
-
-                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speichern der Exportdatei");
-
-                /*
-                * Aufräumen der Objecte und freigeben von Speicher
-                * ToDo: Encoding bei speichern korrigieren
-                */
-                using (StreamWriter sw = new StreamWriter(ImportInfo.ExportFileName, false, enc))
-                {
-                    
-                    workbook.SaveAs(sw.BaseStream, new SaveOptions { EvaluateFormulasBeforeSaving = false, GenerateCalculationChain = false, ValidatePackage = false });
-                }
-
-                (sender as BackgroundWorker).ReportProgress(iProgress++, "Speicher bereinigen");
-
-                ErrStrLst.Clear();
-                HeaderList.Clear();
-                recList.Clear();
-                Filialen.Clear();
-                FilialenExport.Clear();
-                ImportOptionShortList.Clear();
-
-                ErrStrLst = null;
-                HeaderList = null;
-                recList = null;
-                Filialen = null;
-                FilialenExport = null;
-                ImportOptionShortList = null;
-            }
-            /*
-            * *****************************************************************
-            */
-
-            (sender as BackgroundWorker).ReportProgress(iProgress=100, "Export abgeschlossen");
+            return Filialen;
         }
 
-        private bool DeleteUnusedColoums(IXLWorksheet ws, int[] IndexToDelete)
+        /// <summary>
+        /// Daten für jede Filiale mit jedem Filterschlüssel extrahieren
+        /// </summary>
+        /// <param name="sender">Der Backgroundworker</param>
+        /// <param name="filiale">Die zu bearbeitende Filiale</param>
+        /// <returns></returns>
+        private List<CSVImportModel> GetFilialDataForExport(List<CSVImportModel> Data, string filiale)
+        {
+            List<CSVImportModel> FilialExportDaten = new List<CSVImportModel>();
+
+            List<string> ImportOptionShortList;
+
+            //TODO: Abbruchbedingung überarbeiten
+            if ((ImportOptionShortList = Import.GetImportOptionsAsList()).Count == 0)
+            {
+                ImportOptionShortList.Clear();
+                ImportOptionShortList = null;
+                FilialExportDaten = null;
+
+                //if ((sender as BackgroundWorker).WorkerSupportsCancellation)
+                //    (sender as BackgroundWorker).CancelAsync();
+
+                return null; ;
+            }
+
+            foreach (var ImportOptionName in ImportOptionShortList)
+            {
+                if (string.IsNullOrWhiteSpace(ImportOptionName))
+                {
+                    continue;
+                }
+                var FilOut = Data.Select(l => l).Where(w => w.LagerKey == filiale && w.FormArt == ImportOptionName).ToList();
+
+                if (FilOut.Count > 0)
+                {
+                    FilialExportDaten.AddRange(FilOut);
+
+                }
+                else
+                    FilialExportDaten.Add(new CSVImportModel() { FormArt = ImportOptionName, LagerKey = filiale, BuchungText = "Keine Daten vorhanden" });
+            }
+
+            ImportOptionShortList.Clear();
+            ImportOptionShortList = null;
+
+            return FilialExportDaten;
+        }
+
+        /// <summary>
+        /// Speichern der gefilterten Daten einer Filiale in einem eigenen Arbeitsblatt
+        /// </summary>
+        /// <param name="HeaderList"></param>
+        /// <param name="FilialenExport"></param>
+        /// <param name="worksheet"></param>
+        private void SaveFilialDataToWorksheet(List<string> HeaderList, List<CSVImportModel> FilialenExport, IXLWorksheet worksheet)
+        {
+            if (HeaderList != null) worksheet.Cell(1, 1).InsertData(HeaderList, true);
+            if (FilialenExport != null) worksheet.Cell(2, 1).InsertData(FilialenExport);
+        }
+
+        /// <summary>
+        /// Nicht mehr benötigte Spalten entfernen
+        /// </summary>
+        /// <param name="ws"></param>
+        /// <param name="IndexToDelete"></param>
+        /// <returns></returns>
+        private bool DeleteUnusedColoumns(IXLWorksheet ws, int[] IndexToDelete)
         {
             if (ws != null && IndexToDelete.Length > 0)
             {
@@ -251,36 +313,138 @@ namespace WpfAppOfficeExcel
             }
             return false;
         }
-
-        private void BadDataResponse(ReadingContext obj)
+        
+        /// <summary>
+         /// Umbenennen der SPalten zur besseren Lesbarkeit
+         /// </summary>
+         /// <param name="worksheet"></param>
+        private bool RenameCoulumns(IXLWorksheet worksheet, int[] IndexToRename, string[] ColumnNames)
         {
-            int row = obj.Row;
-            string col = obj.Field;
+            //Umbenennen der Überschriften
+            if (IndexToRename.Length != ColumnNames.Length)
+            {
+                return false;
+            }
+            else
+            {
+                for (int i = 0; i < IndexToRename.Length; i++)
+                {
+                    worksheet.Column(IndexToRename[i]).Cell(1).Value = ColumnNames[i];
+                }
+            }
+            return true;
         }
 
-        void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
+        /// <summary>
+        /// Sortieren der Daten
+        /// Überschriften auf BOLD setzen
+        /// Autofilter Aktivieren
+        /// Spaltenbreite an Inhalt anpassen
+        /// </summary>
+        /// <param name="worksheet"></param>
+        private void SortAndFormatXlsSheet(IXLWorksheet worksheet)
+        {
+            ////Sortieren der Daten
+            var lastCellUsed = worksheet.LastCellUsed();
+            var lastCellUsedAddress = $"A2:{lastCellUsed.Address.ToString()}";
+            var DataRange = worksheet.Range(lastCellUsedAddress);
+            DataRange.Sort("F, C, D, E");
+
+            //Autofilter und Spaltenbreite an Inhalt anpassen
+            worksheet.RangeUsed().SetAutoFilter();
+
+            //Spaltenbreite an Inhalt anpassen
+            worksheet.Columns().AdjustToContents(1, lastCellUsed.Address.RowNumber);
+            worksheet.Row(1).Style.Font.SetBold();
+
+            //Formatieren
+            //Druckbereich
+            //Druckeigenschaften
+        }
+
+        /// <summary>
+        /// Speichern Fehlerhafter Zeilen zur manuellen Korrektur
+        /// </summary>
+        /// <param name="HeaderList"></param>
+        /// <param name="workbook"></param>
+        private void SaveErrorData(List<string[]> ErrStrLst, List<string> HeaderList, XLWorkbook workbook)
+        {           
+            if (ErrStrLst.Count > 0)
+            {
+                int row = 2;
+                var errorworksheet = workbook.Worksheets.Add("Fehlerliste");
+
+                errorworksheet.Cell(1, 1).InsertData(HeaderList, true);
+
+                foreach (var item in ErrStrLst)
+                {
+                    errorworksheet.Cell(row, 1).InsertData(item.ToList(), true);
+                    row++;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Fortschritt an GUI weiterleiten
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void worker_ProgressChanged(object sender, ProgressChangedEventArgs e)
         {
             pbStatus.Value = e.ProgressPercentage;
             pbStatusText.Text = e.UserState as string;
         }
 
+        /// <summary>
+        /// Vorgang ist komplett. Der Worker beendet
+        /// Aufräumen
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void worker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-
         {
-            pbStatus.Value = pbStatus.Maximum;
             pbStatusRun.IsIndeterminate = false;
-            ButtonOpenExcelExport.IsEnabled = true;
-            ButtonSaveExportAs.IsEnabled = true;
+            pbStatus.Value = pbStatus.Maximum;
+
+            if (e.Cancelled)
+            {
+                pbStatusText.Text = "Abgebrochen";
+                pbStatusRun.IsIndeterminate = false;
+            }
+            else if (e.Error != null)
+            {
+                pbStatusText.Text = "Error: " + e.Error.Message;
+            }
+            else
+            {
+                ButtonOpenExcelExport.IsEnabled = true;
+                ButtonSaveExportAs.IsEnabled = true;
+
+                if (OpenExportAfterSave == true)
+                {
+                    OpenExcelExport();
+                }
+            }
+
+            ButtCancelImport.IsEnabled = false;
+            ButtCancelImport.Visibility = System.Windows.Visibility.Collapsed;
+
             BEnableImportOptions = true;
 
             //Timer für Messung stoppen
-            if(dt.IsEnabled)
+            if (dt.IsEnabled)
                 dt.Stop();
+        }
 
-            if (OpenExportAfterSave == true)
-            {
-                OpenExcelExport();
-            }
+        /// <summary>
+        /// Event, wenn Daten nicht richtig gelesen werden konnten
+        /// </summary>
+        /// <param name="obj"></param>
+        private void BadDataResponse(ReadingContext obj)
+        {
+            int row = obj.Row;
+            string col = obj.Field;
+            Debug.WriteLine($"{row} -- {col}", "BadDataResponse");
         }
     }
 }
