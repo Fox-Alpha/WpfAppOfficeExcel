@@ -69,7 +69,7 @@ namespace WpfAppOfficeExcel
 
         private bool bEnableImportOptions = false;
 
-        private BackgroundWorker worker = new BackgroundWorker();
+        private BackgroundWorker worker = new BackgroundWorker();        
         private List<string[]> ErrStrLst = new List<string[]>();
 
         public event PropertyChangedEventHandler PropertyChanged;
@@ -249,7 +249,7 @@ namespace WpfAppOfficeExcel
                 Title = "Eine Datei für den Import auswählen",
                 //CheckFileExists = true,
                 CheckPathExists = true,
-                Filter = "Csv files (*.csv)|*.csv|Alle Dateien (*.*)|*.*",
+                Filter = "Csv files (*.xlsx)|*.xlsx|Alle Dateien (*.*)|*.*",
                 FilterIndex = 0
             };
 
@@ -258,10 +258,6 @@ namespace WpfAppOfficeExcel
                 File.Copy(ImportInfo.ExportFileName, saveFileDialog.FileName, false);
 
                 ImportInfo.ExportFileName = saveFileDialog.FileName;
-
-                /*
-                 * ToDo: export.xlsx zum ausgewählten Ort kopieren
-                 */
             }
         }
 
@@ -273,8 +269,8 @@ namespace WpfAppOfficeExcel
                 worker.CancelAsync();
             }
             
-            ButtCancelImport.IsEnabled = false;
-            ButtCancelImport.Visibility = System.Windows.Visibility.Collapsed;
+            //ButtCancelImport.IsEnabled = false;
+            //ButtCancelImport.Visibility = System.Windows.Visibility.Collapsed;
         }
     }
 }
