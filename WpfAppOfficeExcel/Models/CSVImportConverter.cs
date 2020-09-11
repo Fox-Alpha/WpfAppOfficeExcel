@@ -55,7 +55,7 @@ namespace WpfAppOfficeExcel.Models.Converter
 
     public class CSVImportCustomDateTimeConverter : DefaultTypeConverter
     {
-        private string CustomDateFormat = @"yyyy-MM-dd'T'hh:mm:ss'.'FFF";
+        //private string CustomDateFormat = @"yyyy-MM-dd'T'hh:mm:ss'.'FFF";
         //private string CustomDateFormat = @"dd/MM/yyyy";
 
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
