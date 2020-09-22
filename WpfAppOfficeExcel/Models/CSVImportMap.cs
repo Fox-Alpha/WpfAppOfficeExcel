@@ -29,7 +29,7 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.SerienNr).Ignore();
             Map(m => m.Kategorie).Ignore();
             Map(m => m.PosKat).Ignore();
-            Map(m => m.BelegDatum).Ignore();
+            Map(m => m.BelegDatum); //.Ignore();
             Map(m => m.BelegZeit).Ignore();
             Map(m => m.Jahr).Ignore();
             Map(m => m.Periode).Ignore();
@@ -48,7 +48,7 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.RSGrund).Name("RS-Grund", "RSGrund").Ignore();
             Map(m => m.Lieferant);
 
-            Map(m => m.LieferDatum);
+            Map(m => m.LieferDatum).Ignore();
             Map(m => m.LieferReferenz).Ignore();
             Map(m => m.Buchung); //.TypeConverter(DateTimeConverter);
             //.TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles( DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
