@@ -35,11 +35,11 @@ namespace WpfAppOfficeExcel
 
             int[] CoulumnsToDelete = new int[] 
                 { 
-                    35, 34, 33, 32, 29, 25, 23, 22, 20, 19, 17, 16, 15, 14, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 
+                    35, 34, 33, 32, 31, 29, 25, 23, 22, 20, 19, 17, 16, 15, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 
                 };
             int[] IndexToRename = new int[] 
             {
-                1, 2, 3, 4, 5, 7, 9, 11
+                1, 2, 3, 5, 6, 7, 10, 12
             };
             string[] ColumnNames = new string[]
             {
@@ -320,6 +320,7 @@ namespace WpfAppOfficeExcel
          /// <param name="worksheet"></param>
         private bool RenameCoulumns(IXLWorksheet worksheet, int[] IndexToRename, string[] ColumnNames)
         {
+            //Dictionary<string, string> debug = new Dictionary<string, string>();
             //Umbenennen der Überschriften
             if (IndexToRename.Length != ColumnNames.Length)
             {
@@ -329,9 +330,12 @@ namespace WpfAppOfficeExcel
             {
                 for (int i = 0; i < IndexToRename.Length; i++)
                 {
+                    //debug.Add(worksheet.Column(IndexToRename[i]).Cell(1).Value.ToString(), ColumnNames[i]);
                     worksheet.Column(IndexToRename[i]).Cell(1).Value = ColumnNames[i];
                 }
             }
+            //debug.Clear();
+            //debug = null;
             return true;
         }
 
