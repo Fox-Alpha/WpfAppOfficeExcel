@@ -9,17 +9,12 @@ namespace WpfAppOfficeExcel.Models
 {
     public class CSVImportModel
     {
-		//Typ Umstellung ggf. Converter erstellen und verwenden
         public string Typ { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string Mandant { get; set; }
         public string FormArt { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string FormIntern { get; set; }
         public string AufNr { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string IntPos { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string UntPos { get; set; }
         public string LagerKey { get; set; }
         public string AnLager { get; set; }
@@ -27,6 +22,7 @@ namespace WpfAppOfficeExcel.Models
         public string SerienNr { get; set; }
         public string Kategorie { get; set; }
         public string PosKat { get; set; }
+        //TODO: Typ Umstellung ggf. Converter erstellen und verwenden
         public string BelegDatum { get; set; }
         public string BelegZeit { get; set; }
         public string Jahr { get; set; }
@@ -37,20 +33,15 @@ namespace WpfAppOfficeExcel.Models
         public string Menge { get; set; }
         public string Kontonummer { get; set; }
         public string Kasse { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string Bon { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string BonPosition { get; set; }
         public string EingabeArtikelNr { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string EingabeMenge { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string Einheitspreis { get; set; }
         public string RSGrund { get; set; } //RS-Grund
         public string Lieferant { get; set; }
         public string LieferDatum { get; set; }
         public string LieferReferenz { get; set; }
-		//TODO: Typ dynamic verwenden, falls ein Wert nicht dem erwarteten Typ  entspricht
         public string Buchung { get; set; }
         public string KontrolliertAm { get; set; }
         public string KontrolliertDurch { get; set; }
