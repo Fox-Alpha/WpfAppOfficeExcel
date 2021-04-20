@@ -12,7 +12,6 @@
     <Window.Resources>
         <converter:BooleanToImportOptionsConverter x:Key="BooleanToImportOptionsConverter"/>
         <converter:IsEnabledImportOptionsConverter x:Key="IsEnabledImportOptionsConverter"/>
-
     </Window.Resources>
 
     <Grid  Background="AliceBlue">
