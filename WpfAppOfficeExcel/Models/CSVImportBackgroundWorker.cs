@@ -397,6 +397,15 @@ namespace WpfAppOfficeExcel
         {
             pbStatus.Value = e.ProgressPercentage;
             pbStatusText.Text = e.UserState as string;
+
+            WriteLogToFile($"{e.ProgressPercentage} - {e.UserState as string}");
+        }
+
+        private void WriteLogToFile(string Message)
+        {
+            string MsgLog = string.Format($"{DateTime.Now.ToString("T")}: {Message}\r\n");
+
+            File.AppendAllText("MessageLog.txt", MsgLog);
         }
 
         /// <summary>
@@ -413,11 +422,14 @@ namespace WpfAppOfficeExcel
             if (e.Cancelled)
             {
                 pbStatusText.Text = "Abgebrochen";
+                WriteLogToFile("Abgebrochen");
                 pbStatusRun.IsIndeterminate = false;
             }
             else if (e.Error != null)
             {
                 pbStatusText.Text = "Error: " + e.Error.Message;
+                WriteLogToFile($"Error: {e.Error.Message}");
+                WriteLogToFile($"Error: {e.Error.StackTrace}");
             }
             else
             {
