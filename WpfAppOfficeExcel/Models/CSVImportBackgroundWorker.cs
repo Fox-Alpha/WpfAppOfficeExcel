@@ -33,10 +33,21 @@ namespace WpfAppOfficeExcel
 
             Encoding enc = Encoding.GetEncoding("iso-8859-1");
 
-            int[] CoulumnsToDelete = new int[] 
-                { 
-                    35, 34, 33, 32, 31, 29, 25, 23, 22, 20, 19, 17, 16, 15, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 
+            int[] CoulumnsToDelete;
+            if (Import.ExpKmpgColumns == true)
+            {
+                CoulumnsToDelete = new int[]
+                {
+                    33, 32, 31, 29, 25, 23, 22, 20, 19, 17, 16, 15, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1
                 };
+            }
+            else
+            {
+                CoulumnsToDelete = new int[]
+                {
+                    35, 34, 33, 32, 31, 29, 25, 23, 22, 20, 19, 17, 16, 15, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1
+                };
+            }
             
             int[] IndexToRename = new int[] 
             {
@@ -353,20 +364,22 @@ namespace WpfAppOfficeExcel
         {
             ////Sortieren der Daten
             var lastCellUsed = worksheet.LastCellUsed();
-            var lastCellUsedAddress = $"A2:{lastCellUsed.Address.ToString()}";
+            var lastCellUsedAddress = $"A2:{lastCellUsed.Address}";
             var DataRange = worksheet.Range(lastCellUsedAddress);
             DataRange.Sort("F, C, D, E");
 
             //Autofilter und Spaltenbreite an Inhalt anpassen
             worksheet.RangeUsed().SetAutoFilter();
 
+            lastCellUsed = worksheet.LastCellUsed();
             //Spaltenbreite an Inhalt anpassen
             worksheet.Columns().AdjustToContents(1, lastCellUsed.Address.RowNumber);
             worksheet.Row(1).Style.Font.SetBold();
 
             //Spalten als Zahl formartieren
             worksheet.Columns("F,J").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.NumberFormatId = 2;
-            worksheet.Columns("I").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.NumberFormatId = 1;
+
+            worksheet.Range($"I2:I{lastCellUsed.Address.RowNumber}").SetDataType(XLDataType.Number);
 
             //Formatieren
             //Druckbereich
