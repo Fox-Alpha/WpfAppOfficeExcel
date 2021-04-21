@@ -121,7 +121,7 @@ namespace WpfAppOfficeExcel
                 DefaultExt = ".CSV",
                 Title = "Eine Datei für den Import auswählen",
                 CheckFileExists = true,
-                Filter = "Csv files (*.csv)|*.csv|Alle Dateien (*.*)|*.*",
+                Filter = "Csv Dateien (*.csv)|*.csv|Alle Dateien (*.*)|*.*",
                 FilterIndex = 0
             };
 
@@ -249,7 +249,7 @@ namespace WpfAppOfficeExcel
                 Title = "Eine Datei für den Import auswählen",
                 //CheckFileExists = true,
                 CheckPathExists = true,
-                Filter = "Csv files (*.xlsx)|*.xlsx|Alle Dateien (*.*)|*.*",
+                Filter = "Excel Dateien (*.xlsx)|*.xlsx|Alle Dateien (*.*)|*.*",
                 FilterIndex = 0
             };
 
