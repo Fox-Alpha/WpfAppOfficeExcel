@@ -39,7 +39,7 @@ namespace WpfAppOfficeExcel
                 };
             int[] IndexToRename = new int[] 
             {
-                1, 2, 3, 5, 6, 7, 10, 12
+                1, 2, 3, 5, 6, 8, 10, 4
             };
             string[] ColumnNames = new string[]
             {
@@ -360,6 +360,9 @@ namespace WpfAppOfficeExcel
             //Spaltenbreite an Inhalt anpassen
             worksheet.Columns().AdjustToContents(1, lastCellUsed.Address.RowNumber);
             worksheet.Row(1).Style.Font.SetBold();
+
+            //Spalten als Zahl formartieren
+            worksheet.Columns("F,I:J").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.FractionPrecision2);
 
             //Formatieren
             //Druckbereich
