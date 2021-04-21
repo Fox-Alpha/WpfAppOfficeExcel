@@ -43,7 +43,7 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.Bon);//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.BonPosition).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.EingabeArtikelNr);
-            Map(m => m.EingabeMenge).ConvertUsing(row => (int)row.GetField<int>("EingabeMenge")); //<CSVImportCustomInt32Converter>();
+            Map(m => m.EingabeMenge); //.ConvertUsing(row => row.GetField<string>("EingabeMenge")); //<CSVImportCustomInt32Converter>();
             Map(m => m.Einheitspreis).ConvertUsing(row => row.GetField<float>("Einheitspreis"));  //.TypeConverter<CSVImportCustomFloatConverter>();
             Map(m => m.RSGrund).Name("RS-Grund", "RSGrund").Ignore();
             Map(m => m.Lieferant);
@@ -52,8 +52,8 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.LieferReferenz).Ignore();
             Map(m => m.Buchung); //.TypeConverter(DateTimeConverter);
             //.TypeConverter<CSVImportCustomDateTimeConverter>(); //.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles( DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
-            Map(m => m.KontrolliertAm).Ignore(); //.TypeConverter<CSVImportCustomDateTimeConverter>();//.TypeConverterOption.NullValues("NULL", "NIL", "?", "").TypeConverterOption.DateTimeStyles(DateTimeStyles.None).TypeConverterOption.CultureInfo(CultureInfo.GetCultureInfo("de-DE"));
-            Map(m => m.KontrolliertDurch).Ignore();
+            Map(m => m.KontrolliertAm);
+            Map(m => m.KontrolliertDurch);//.Ignore();
         }
     }
 }
