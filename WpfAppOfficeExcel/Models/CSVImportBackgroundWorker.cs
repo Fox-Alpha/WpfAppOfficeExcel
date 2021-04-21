@@ -127,6 +127,8 @@ namespace WpfAppOfficeExcel
 
                                 SortAndFormatXlsSheet(worksheet);
                             }
+                            FilialenExport.Clear();
+                            //worksheet = null;
                             fi++;
                         }
                         else if (FilialenExport != null && FilialenExport.Count == 0)
@@ -172,7 +174,7 @@ namespace WpfAppOfficeExcel
                 * Aufräumen der Objecte und freigeben von Speicher
                 */
                 Filialen.Clear();
-                FilialenExport.Clear();
+                FilialenExport?.Clear();
                 Filialen = null;
                 FilialenExport = null;
             }
