@@ -171,6 +171,7 @@ namespace WpfAppOfficeExcel
             //var map = re.ReadingContext.ReusableMemberMapData.Names[0];
             var row = re.ReadingContext.Row;
             var rec = re.ReadingContext.Record;
+            var idx = re.ReadingContext.CurrentIndex;
             //var bld = re.ReadingContext.RawRecordBuilder.ToString();
 
             ErrStrLst.Add(rec);
@@ -181,7 +182,7 @@ namespace WpfAppOfficeExcel
             sb.AppendLine("");
             sb.AppendLine($"Der Fehler trat in der Zeile {row} auf");
             //sb.AppendLine($"Der Wert: {txt} konnte nicht in das erwartete Format umgewandelt werden");
-            //sb.AppendLine($"Der Wert trat in der Spalte {idx + 1} auf");
+            sb.AppendLine($"Der Wert trat in der Spalte {idx + 1} auf");
             //sb.AppendLine($"Der Name der Spalte lautet {map}");
             sb.AppendLine($"");
             sb.AppendLine($"Die Zeile besteht aus folgenden Daten:");
@@ -196,6 +197,7 @@ namespace WpfAppOfficeExcel
             sb.AppendLine($"");
 
             var err = sb.ToString();
+            Debug.WriteLine(err);
             sb.Clear();
             sb = null;
 
