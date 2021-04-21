@@ -31,12 +31,13 @@ namespace WpfAppOfficeExcel
         {
             BackgroundWorker bgworker = sender as BackgroundWorker;
 
-            Encoding enc = Encoding.GetEncoding(1252);
+            Encoding enc = Encoding.GetEncoding("iso-8859-1");
 
             int[] CoulumnsToDelete = new int[] 
                 { 
                     35, 34, 33, 32, 31, 29, 25, 23, 22, 20, 19, 17, 16, 15, 13, 12, 11, 9, 7, 6, 5, 4, 2, 1 
                 };
+            
             int[] IndexToRename = new int[] 
             {
                 1, 2, 3, 5, 6, 8, 10, 4
@@ -184,7 +185,7 @@ namespace WpfAppOfficeExcel
             bool hasData = false;
             recList = new List<CSVImportModel>();
             HeaderList = new List<string>();
-            Encoding enc = Encoding.GetEncoding(1252);
+            Encoding enc = Encoding.GetEncoding("iso-8859-1");
 
             CsvConfiguration csvConfig = new CsvConfiguration(CultureInfo.InvariantCulture)
             {
