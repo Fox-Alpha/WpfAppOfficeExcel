@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Windows.Navigation;
 
 namespace WpfAppOfficeExcel.Models
 {
@@ -36,14 +37,49 @@ namespace WpfAppOfficeExcel.Models
         public string Bon { get; set; }
         public string BonPosition { get; set; }
         public string EingabeArtikelNr { get; set; }
-        public int EingabeMenge { get; set; }
+        private int? eingabeMenge;
+        public string EingabeMenge
+        {
+            get { return eingabeMenge.Value.ToString(); }
+            set
+            {
+                if (value != "?" && !string.IsNullOrEmpty(value))
+                {
+                    if (int.TryParse(value, out int em))
+                        eingabeMenge = em;
+                    else
+                        eingabeMenge = null;
+                }
+                else
+                    eingabeMenge = null;
+            }
+        }
         public float Einheitspreis { get; set; }
         public string RSGrund { get; set; } //RS-Grund
         public string Lieferant { get; set; }
         public string LieferDatum { get; set; }
         public string LieferReferenz { get; set; }
         public string Buchung { get; set; }
-        public string KontrolliertAm { get; set; }
+
+        private static readonly CultureInfo deDE = new CultureInfo("de-DE");
+        private DateTime kontrolliertAm;
+        public string KontrolliertAm
+        //{ get; set; }
+        {
+            get { return kontrolliertAm.ToString("dd.MM.yyyy"); }
+            set
+            {
+                if (value != "?" && !string.IsNullOrEmpty(value))
+                {
+                    kontrolliertAm = DateTime.ParseExact(value, @"yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fff", deDE);
+                    //yyyy'-'MM'-'dd'T'HH':'mm':'ss
+                }
+                else
+                    kontrolliertAm = new DateTime(1977, 12, 2);
+
+
+            }
+        }
         public string KontrolliertDurch { get; set; }
 
         public CSVImportModel()
