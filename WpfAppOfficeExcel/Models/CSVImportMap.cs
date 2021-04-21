@@ -37,14 +37,14 @@ namespace WpfAppOfficeExcel.Models
             Map(m => m.Bemerkung).Ignore();
             Map(m => m.Benutzer).Ignore();
 
-            Map(m => m.Menge).ConvertUsing(row => row.GetField<float>("Menge"));
+            Map(m => m.Menge).ConvertUsing(row => row.GetField<float>("Menge")); //.TypeConverter<CSVImportCustomFloatConverter>();//
             Map(m => m.Kontonummer).Ignore();
             Map(m => m.Kasse).Ignore();
             Map(m => m.Bon);//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.BonPosition).Ignore();//.TypeConverter<CSVImportCustomInt32Converter>();
             Map(m => m.EingabeArtikelNr);
             Map(m => m.EingabeMenge); //.ConvertUsing(row => row.GetField<string>("EingabeMenge")); //<CSVImportCustomInt32Converter>();
-            Map(m => m.Einheitspreis).ConvertUsing(row => row.GetField<float>("Einheitspreis"));  //.TypeConverter<CSVImportCustomFloatConverter>();
+            Map(m => m.Einheitspreis).TypeConverter<CSVImportCustomFloatConverter>(); //.ConvertUsing(row => row.GetField<float>("Einheitspreis"));  //.TypeConverter<CSVImportCustomFloatConverter>();
             Map(m => m.RSGrund).Name("RS-Grund", "RSGrund").Ignore();
             Map(m => m.Lieferant);
 

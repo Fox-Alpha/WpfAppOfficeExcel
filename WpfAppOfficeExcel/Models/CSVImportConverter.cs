@@ -36,20 +36,12 @@ namespace WpfAppOfficeExcel.Models.Converter
     {
         public override object ConvertFromString(string text, IReaderRow row, MemberMapData memberMapData)
         {
-            float f;
-
-            if (text == "?")
+            if (text == "?" || string.IsNullOrEmpty(text))
             {
-                return 0.0f;
+                return 9999.99f;
             }
 
-            if (float.TryParse(text, out f))
-            {
-                return f;
-            }
-
-            return null; 
-            //base.ConvertFromString(text, row, memberMapData);    
+            return row.GetField<float>("Einheitspreis");
         }
     }
 
