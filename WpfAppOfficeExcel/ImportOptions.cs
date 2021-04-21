@@ -39,6 +39,19 @@ namespace WpfAppOfficeExcel.Importer
             {Enum.GetName(typeof(enumImportOptions), enumImportOptions.Inventur), "MI"},     // ???
         };
 
+        private bool expKmpgColumns;
+
+        public bool ExpKmpgColumns
+        {
+            get { return expKmpgColumns; }
+            set 
+            { 
+                expKmpgColumns = value;
+                OnPropertyRaised("ExpKmpgColumns");
+            }
+        }
+
+
         private enumImportOptions activeImportOptions = enumImportOptions.None;
         public enumImportOptions ActiveImportOptions
         {

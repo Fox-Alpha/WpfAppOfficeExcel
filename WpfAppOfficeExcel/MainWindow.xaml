@@ -44,6 +44,7 @@
                 <Button x:Name="ButtonDebugFile" Click="ButtonDebugFile_Click" Content="DEBUGG" Margin="5"/>
             </StackPanel>
             <CheckBox Content="Export automatisch in Excel öffnen ?" IsChecked="{Binding OpenExportAfterSave, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0"/>
+            <CheckBox Content="Spalten für KMPG exportieren ?" IsChecked="{Binding Path=Import.ExpKmpgColumns, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Margin="0,5,0,0"/>
             <TextBlock Text="{Binding ImportInfo.ImportFileName, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}" Margin="0,10,0,10" Padding="3" x:Name="tbFilePathInfo" TextTrimming="WordEllipsis" MaxWidth="350"/>
             
             <!--Aktivitäts Anzeige-->
