@@ -40,7 +40,7 @@ namespace WpfAppOfficeExcel.Models
         private int? eingabeMenge;
         public string EingabeMenge
         {
-            get { return eingabeMenge.Value.ToString(); }
+            get { return eingabeMenge== null ? "" : eingabeMenge.Value.ToString(); }
             set
             {
                 if (value != "?" && !string.IsNullOrEmpty(value))
