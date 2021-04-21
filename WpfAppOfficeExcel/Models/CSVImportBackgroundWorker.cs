@@ -88,6 +88,8 @@ namespace WpfAppOfficeExcel
                 List<string> Filialen = GetFilialListe(recList);
                 List<CSVImportModel> FilialenExport = new List<CSVImportModel>();
 
+                System.Threading.Thread.CurrentThread.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+
                 using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
                 {
                     int fi = 1;
@@ -362,7 +364,8 @@ namespace WpfAppOfficeExcel
             worksheet.Row(1).Style.Font.SetBold();
 
             //Spalten als Zahl formartieren
-            worksheet.Columns("F,I:J").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.SetNumberFormatId((int)XLPredefinedFormat.Number.FractionPrecision2);
+            worksheet.Columns("F,J").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.NumberFormatId = 2;
+            worksheet.Columns("I").AdjustToContents(1, lastCellUsed.Address.RowNumber).Style.NumberFormat.NumberFormatId = 1;
 
             //Formatieren
             //Druckbereich

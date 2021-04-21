@@ -30,14 +30,14 @@ namespace WpfAppOfficeExcel.Models
         public string BuchungText { get; set; }
         public string Bemerkung { get; set; }
         public string Benutzer { get; set; }
-        public string Menge { get; set; }
+        public float Menge { get; set; }
         public string Kontonummer { get; set; }
         public string Kasse { get; set; }
         public string Bon { get; set; }
         public string BonPosition { get; set; }
         public string EingabeArtikelNr { get; set; }
-        public string EingabeMenge { get; set; }
-        public string Einheitspreis { get; set; }
+        public int EingabeMenge { get; set; }
+        public float Einheitspreis { get; set; }
         public string RSGrund { get; set; } //RS-Grund
         public string Lieferant { get; set; }
         public string LieferDatum { get; set; }
