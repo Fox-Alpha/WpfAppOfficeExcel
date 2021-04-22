@@ -55,7 +55,6 @@ namespace WpfAppOfficeExcel.Importer
         public bool OneSheetOnly { get => oneSheetOnly; set { oneSheetOnly = value; OnPropertyRaised("OneSheetOnly"); } }
 
         private enumImportOptions activeImportOptions = enumImportOptions.None;
-        private bool oneSheetOnly1 = false;
 
         public enumImportOptions ActiveImportOptions
         {
