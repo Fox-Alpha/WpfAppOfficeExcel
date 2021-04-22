@@ -105,85 +105,162 @@ namespace WpfAppOfficeExcel
                 using (var workbook = new XLWorkbook(new LoadOptions() { EventTracking = XLEventTracking.Enabled }))
                 {
                     int fi = 1;
+                    IXLWorksheet worksheet = null;
 
-                    foreach (var filiale in Filialen)
+                    
+
+                    //foreach (var filiale in Filialen)
                     {
-                        bgworker.ReportProgress(iProgress++, $"Filtern der Daten für Filiale {filiale} - {fi}/{Filialen.Count()}");
-
-                        FilialenExport = GetFilialDataForExport(recList, filiale);
-
-                        if (FilialenExport != null && FilialenExport.Count > 0)
                         {
                             bgworker.ReportProgress(iProgress++, "Export zu Excel");
 
-                            var worksheet = workbook.Worksheets.Add(filiale);
+                            if (!import.OneSheetOnly)
+                            {
+
+                                foreach (var filiale in Filialen)
+                                {
+                                    FilialenExport = GetFilialDataForExport(recList, filiale);
+
+                                    if (FilialenExport != null && FilialenExport.Count > 0)
+                                    {
+                                        bgworker.ReportProgress(iProgress++, $"Filtern der Daten für Filiale {filiale} - {fi}/{Filialen.Count()}");
+
+                                        worksheet = workbook.Worksheets.Add(filiale);
+
+                                        if (worksheet is null)
+                                        {
+                                            bgworker.ReportProgress(iProgress++, $"Fehler beim anlegen der Excel Daten : {filiale}");
+                                            //e.Cancel = true;
+                                            //CleanupLists(ref recList, ref Filialen, ref FilialenExport, ref HeaderList);
+                                            //return;
+                                            //break;
+                                            continue;
+
+                                        }
+
+                                        SaveFilialDataToWorksheet(HeaderList, FilialenExport, worksheet);
+
+                                        bgworker.ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {filiale} - {fi} / {Filialen.Count()}");
+
+                                        if (DeleteUnusedColoumns(worksheet, CoulumnsToDelete))
+                                        {
+                                            RenameCoulumns(worksheet, IndexToRename, ColumnNames);
+
+                                            SortAndFormatXlsSheet(worksheet);
+                                        }
+                                    }
+                                    else if (FilialenExport != null && FilialenExport.Count == 0)
+                                    {
+                                        bgworker.ReportProgress(iProgress++, $"Keine Daten für Filiale {filiale} für Export gefunden");
+                                    }
+                                }
+                                if (workbook != null)
+                                    SaveWorkBookToFile(e, bgworker, enc, ErrStrLst, HeaderList, workbook);
+
+                                CleanupLists(ref recList, ref Filialen, ref FilialenExport, ref HeaderList);
+                                return;
+                            }
+
+                            if (import.OneSheetOnly)
+                            {
+                                worksheet = workbook.Worksheets.Add("Datenexport");
+                            }
+
+                            for (int i = 0; i < Filialen.Count; i++)
+                            {
+                                FilialenExport.AddRange(GetFilialDataForExport(recList, Filialen[i]));
+                            }
+
+                            if(FilialenExport == null || FilialenExport.Count == 0)
+                            {
+                                bgworker.ReportProgress(iProgress++, $"Filtern der Daten für Filialen");
+                                CleanupLists(ref recList, ref Filialen, ref FilialenExport, ref HeaderList);
+                                e.Cancel = true;
+                                return;
+                            }
 
                             SaveFilialDataToWorksheet(HeaderList, FilialenExport, worksheet);
 
-                            bgworker.ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {filiale} - {fi} / {Filialen.Count()}");
+                            //bgworker.ReportProgress(iProgress++, $"Anpassen der Exportierten Daten: {filiale} - {fi} / {Filialen.Count()}");
+
                             if (DeleteUnusedColoumns(worksheet, CoulumnsToDelete))
                             {
                                 RenameCoulumns(worksheet, IndexToRename, ColumnNames);
 
                                 SortAndFormatXlsSheet(worksheet);
                             }
+
                             FilialenExport.Clear();
                             //worksheet = null;
                             fi++;
                         }
-                        else if (FilialenExport != null && FilialenExport.Count == 0)
-                        {
-                            bgworker.ReportProgress(iProgress++, $"Keine Daten für Filiale {filiale} für Export gefunden");
-                        }
-                        else
-                        {
-                            e.Cancel = true;
-                            break;
-                        }
+                        
+                        //if (FilialenExport != null && FilialenExport.Count == 0)
+                        //{
+                        //    bgworker.ReportProgress(iProgress++, $"Keine Daten für Filiale {filiale} für Export gefunden");
+                        //}
+                        //else
+                        //{
+                        //    e.Cancel = true;
+                        //    //break;
+                        //}
 
                         if (e.Cancel || bgworker.CancellationPending)
                         {
                             e.Cancel = true;
-                            break;
+                            SaveWorkBookToFile(e, bgworker, enc, ErrStrLst, HeaderList, workbook);
+                            return;
+                            //break;
                         }
                     }
-                    recList.Clear();
-                    recList = null;
+                    /*
+                    * Aufräumen der Objecte und freigeben von Speicher
+                    */
+                    CleanupLists(ref recList, ref Filialen, ref FilialenExport, ref HeaderList);
 
-                    bgworker.ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
-                    SaveErrorData(ErrStrLst, HeaderList, workbook);
-
-                    if (!e.Cancel && !bgworker.CancellationPending)
-                    {
-                        bgworker.ReportProgress(iProgress++, "Speichern der Exportdatei");
-
-                        using (StreamWriter sw = new StreamWriter(ImportInfo.ExportFileName, false, enc))
-                        {
-                            workbook.SaveAs(sw.BaseStream,
-                                            new SaveOptions
-                                            {
-                                                EvaluateFormulasBeforeSaving = false,
-                                                GenerateCalculationChain = false,
-                                                ValidatePackage = false
-                                            });
-                            bgworker.ReportProgress(iProgress = 100, "Export abgeschlossen");
-                        }
-                    }
+                    if (workbook != null)
+                        SaveWorkBookToFile(e, bgworker, enc, ErrStrLst, HeaderList, workbook);
                 }
-                /*
-                * Aufräumen der Objecte und freigeben von Speicher
-                */
-                Filialen.Clear();
-                FilialenExport?.Clear();
-                Filialen = null;
-                FilialenExport = null;
             }
-
             ErrStrLst.Clear();
-            HeaderList.Clear();
-
             ErrStrLst = null;
+        }
+
+        private void CleanupLists(ref List<CSVImportModel> recList, ref List<string> Filialen, ref List<CSVImportModel> FilialenExport, ref List<string> HeaderList)
+        {
+            recList.Clear();
+            recList = null;
+
+            Filialen.Clear();
+            FilialenExport?.Clear();
+            Filialen = null;
+            FilialenExport = null;
+
+            HeaderList.Clear();
             HeaderList = null;
+        }
+
+        private void SaveWorkBookToFile(DoWorkEventArgs e, BackgroundWorker bgworker, Encoding enc, List<string[]> ErrStrLst, List<string> HeaderList, XLWorkbook workbook)
+        {
+            bgworker.ReportProgress(iProgress++, "Speichern Fehlerhafter Zeilen");
+            SaveErrorData(ErrStrLst, HeaderList, workbook);
+
+            if (!e.Cancel && !bgworker.CancellationPending)
+            {
+                bgworker.ReportProgress(iProgress++, "Speichern der Exportdatei");
+
+                using (StreamWriter sw = new StreamWriter(ImportInfo.ExportFileName, false, enc))
+                {
+                    workbook.SaveAs(sw.BaseStream,
+                                    new SaveOptions
+                                    {
+                                        EvaluateFormulasBeforeSaving = false,
+                                        GenerateCalculationChain = false,
+                                        ValidatePackage = false
+                                    });
+                    bgworker.ReportProgress(iProgress = 100, "Export abgeschlossen");
+                }
+            }
         }
 
         /// <summary>
