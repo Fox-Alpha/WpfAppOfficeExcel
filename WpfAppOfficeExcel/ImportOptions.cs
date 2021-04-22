@@ -21,7 +21,7 @@ namespace WpfAppOfficeExcel.Importer
             UmlagerungAusgang = 256,
             Inventur = 512
         }
-    
+
     public class ImportOptions : INotifyPropertyChanged
     {
         public readonly Dictionary<string, string> dictImportOptions = new Dictionary<string, string>()
@@ -44,19 +44,23 @@ namespace WpfAppOfficeExcel.Importer
         public bool ExpKmpgColumns
         {
             get { return expKmpgColumns; }
-            set 
-            { 
+            set
+            {
                 expKmpgColumns = value;
                 OnPropertyRaised("ExpKmpgColumns");
             }
         }
 
+        private bool oneSheetOnly = false;
+        public bool OneSheetOnly { get => oneSheetOnly; set { oneSheetOnly = value; OnPropertyRaised("OneSheetOnly"); } }
 
         private enumImportOptions activeImportOptions = enumImportOptions.None;
+        private bool oneSheetOnly1 = false;
+
         public enumImportOptions ActiveImportOptions
         {
             get { return activeImportOptions; }
-            set 
+            set
             {
                 if (value == enumImportOptions.None)
                 {
@@ -97,12 +101,12 @@ namespace WpfAppOfficeExcel.Importer
             {
                 if ((activeImportOptions & val) == val)
                 {
-                    if(dictImportOptions.TryGetValue(Enum.GetName(typeof(enumImportOptions), val), out string shortVal))
+                    if (dictImportOptions.TryGetValue(Enum.GetName(typeof(enumImportOptions), val), out string shortVal))
                     {
                         listImpOpt.Add(shortVal);
-                    }                    
+                    }
                 }
-            }           
+            }
 
             return listImpOpt;
         }
